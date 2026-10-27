@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Furnigo — Where luxury meets comfort</title>
+<meta name="description" content="Furnigo: considered furniture in calm materials, made to order and delivered by hand. A UI/UX concept by Anas Fawaz.">
+<meta name="theme-color" content="#2B2D31">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Furnigo, built from its own design system: Poppins for headings, Inter for text, an 8-point grid,
+     charcoal and warm neutrals with one burgundy accent for the moments that matter. */
+  :root {
+    --char: #2B2D31;
+    --char-2: #3C3F45;
+    --stone: #6B6F77;
+    --sand: #D7D1C6;
+    --ivory: #F3F1ED;
+    --paper: #FBFAF8;
+    --wine: #8F1D3F;
+    --wine-2: #741632;
+    --ok: #2F6B4A;
+    --line: rgba(43, 45, 49, .12);
+    --line-2: rgba(43, 45, 49, .24);
+    --head: 'Poppins', 'Segoe UI', sans-serif;
+    --body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --wrap: 1280px;
+    --gutter: clamp(16px, 4.5vw, 56px);
+    --r: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { font: 400 1rem/1.6 var(--body); color: var(--char); background: var(--paper); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  body.lock { overflow: hidden; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  ul, ol { list-style: none; }
+  :focus-visible { outline: 2px solid var(--wine); outline-offset: 3px; }
+  section[id] { scroll-margin-top: 88px; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  h1, h2, h3 { font-family: var(--head); letter-spacing: -0.02em; }
+  h2 { font-size: clamp(1.9rem, 3.4vw, 2.8rem); line-height: 1.12; font-weight: 600; }
+  .muted { color: var(--stone); }
+  svg.i { width: 20px; height: 20px; flex: none; }
+
+  /* ---------- Splash: the curtain that opens the store ---------- */
+  .splash { position: fixed; inset: 0; z-index: 100; background: var(--char); color: var(--ivory); display: grid; place-items: center; text-align: center;
+    transition: transform .9s cubic-bezier(.7, 0, .2, 1), visibility 0s .9s; }
+  .splash.is-done { transform: translateY(-100%); visibility: hidden; }
+  .splash-mark { font: 600 clamp(3rem, 10vw, 7rem)/1.18 var(--head); letter-spacing: -0.03em; display: flex; justify-content: center; overflow: hidden; padding: 0 .06em .08em; }
+  .splash-mark span { display: inline-block; transform: translateY(110%); animation: rise .75s var(--ease) forwards; }
+  .splash-mark span:nth-child(2) { animation-delay: .06s; } .splash-mark span:nth-child(3) { animation-delay: .12s; } .splash-mark span:nth-child(4) { animation-delay: .18s; }
+  .splash-mark span:nth-child(5) { animation-delay: .24s; } .splash-mark span:nth-child(6) { animation-delay: .30s; } .splash-mark span:nth-child(7) { animation-delay: .36s; }
+  .splash-mark span.go { color: #E7A9B9; }
+  @keyframes rise { to { transform: none; } }
+  .splash-line { margin-top: 10px; font-size: clamp(1rem, 2vw, 1.2rem); color: var(--sand); opacity: 0; animation: fade .6s .8s forwards; }
+  @keyframes fade { to { opacity: 1; } }
+  .splash-bar { margin: 34px auto 0; width: min(260px, 60vw); height: 2px; background: rgba(243, 241, 237, .16); overflow: hidden; }
+  .splash-bar i { display: block; height: 100%; width: 0; background: #C9446B; animation: load 1.5s .3s var(--ease) forwards; }
+  @keyframes load { to { width: 100%; } }
+  .splash-skip { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); border: 0; background: none; color: var(--sand); font-size: .85rem; text-decoration: underline; text-underline-offset: 4px; }
+
+  /* ---------- Buttons ---------- */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 28px; border-radius: var(--r);
+    border: 1px solid transparent; background: none; font: 600 .95rem/1 var(--head); text-decoration: none; transition: background-color .2s, color .2s, border-color .2s; }
+  .btn--dark { background: var(--char); color: var(--ivory); }
+  .btn--dark:hover { background: #18191c; }
+  .btn--wine { background: var(--wine); color: #fff; }
+  .btn--wine:hover { background: var(--wine-2); }
+  .btn--line { border-color: var(--char); }
+  .btn--line:hover { background: var(--char); color: var(--ivory); }
+  .btn--light { background: var(--ivory); color: var(--char); }
+  .btn--light:hover { background: #fff; }
+  .btn--block { width: 100%; }
+  .icon-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; background: none; border-radius: 50%; transition: background-color .2s; }
+  .icon-btn:hover { background: rgba(43, 45, 49, .06); }
+  .badge { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--wine); color: #fff; font: 600 .68rem/18px var(--body); text-align: center; transform: scale(0); transition: transform .3s var(--ease); }
+  .badge.is-on { transform: scale(1); }
+  .badge.bump { animation: bump .4s var(--ease); }
+  @keyframes bump { 40% { transform: scale(1.35); } }
+
+  /* ---------- Header ---------- */
+  .announce { background: var(--char); color: var(--ivory); font-size: .82rem; text-align: center; padding: 9px 16px; }
+  .head { position: sticky; top: 0; z-index: 40; background: rgba(251, 250, 248, .92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: border-color .3s; }
+  .head.is-scrolled { border-bottom-color: var(--line); }
+  .head-inner { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 76px; gap: 16px; }
+  .menu { display: flex; gap: 30px; }
+  .menu a { position: relative; font-size: .92rem; font-weight: 500; text-decoration: none; padding: 6px 0; }
+  .menu a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--wine); transform: scaleX(0); transform-origin: right; transition: transform .35s var(--ease); }
+  .menu a:hover::after, .menu a[aria-current="true"]::after { transform: scaleX(1); transform-origin: left; }
+  .brand { font: 600 1.7rem/1 var(--head); letter-spacing: -0.03em; text-decoration: none; }
+  .brand span { color: var(--wine); }
+  .tools { display: flex; justify-content: flex-end; gap: 4px; }
+  .burger { display: none; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 16px 0 0; }
+  .hero-frame { position: relative; border-radius: 16px; overflow: hidden; min-height: min(78vh, 760px); background: var(--sand); }
+  .hero-frame > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); transition: transform 1.8s var(--ease); }
+  .hero-frame.is-in > img { transform: scale(1); }
+  .hero-frame::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20, 20, 22, .72) 0%, rgba(20, 20, 22, .38) 42%, rgba(20, 20, 22, 0) 68%), linear-gradient(0deg, rgba(20, 20, 22, .45) 0%, rgba(20, 20, 22, 0) 45%); pointer-events: none; }
+  .hero-copy { position: absolute; z-index: 2; left: clamp(20px, 5vw, 64px); bottom: clamp(24px, 6vw, 72px); max-width: 560px; color: #fff; }
+  .hero h1 { font-size: clamp(2.6rem, 6vw, 5rem); line-height: 1.02; font-weight: 600; letter-spacing: -0.035em; }
+  .hero-copy p { margin-top: 18px; max-width: 42ch; font-size: 1.08rem; color: rgba(255, 255, 255, .88); }
+  .hero-actions { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-actions .btn--line { border-color: rgba(255, 255, 255, .7); color: #fff; }
+  .hero-actions .btn--line:hover { background: #fff; color: var(--char); }
+  .spot { position: absolute; z-index: 3; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .95); box-shadow: 0 4px 14px rgba(0, 0, 0, .25); display: grid; place-items: center; }
+  .spot::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--wine); }
+  .spot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .9); animation: ping 2.4s var(--ease) infinite; }
+  @keyframes ping { 0% { transform: scale(.7); opacity: 1; } 80%, 100% { transform: scale(1.6); opacity: 0; } }
+  .spot-card { position: absolute; z-index: 4; width: 230px; padding: 14px 16px; background: #fff; border-radius: var(--r); box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .4);
+    opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity .25s, transform .25s var(--ease); }
+  .spot-card.is-open { opacity: 1; transform: none; pointer-events: auto; }
+  .spot-card strong { display: block; font: 600 1rem/1.2 var(--head); }
+  .spot-card span { font-size: .85rem; color: var(--stone); }
+  .spot-card button { margin-top: 10px; border: 0; background: none; padding: 0; font-size: .85rem; font-weight: 600; color: var(--wine); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---------- Promises ---------- */
+  .promise ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+  .promise li { display: flex; gap: 14px; align-items: flex-start; padding: 28px 24px 28px 0; }
+  .promise li + li { padding-left: 24px; border-left: 1px solid var(--line); }
+  .promise svg { width: 26px; height: 26px; color: var(--wine); flex: none; margin-top: 2px; }
+  .promise strong { display: block; font: 600 .95rem/1.4 var(--head); }
+  .promise span { font-size: .86rem; color: var(--stone); }
+
+  /* ---------- Shop ---------- */
+  .shop { padding: 96px 0 40px; }
+  .shop-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px 32px; }
+  .shop-head p { max-width: 40ch; }
+  .toolbar { margin-top: 32px; display: grid; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { min-height: 40px; padding: 0 18px; border-radius: 20px; border: 1px solid var(--line-2); background: none; font-size: .88rem; font-weight: 500; transition: background-color .2s, color .2s, border-color .2s; }
+  .chip:hover { border-color: var(--char); }
+  .chip[aria-pressed="true"] { background: var(--char); border-color: var(--char); color: var(--ivory); }
+  .refine { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; }
+  .ctl { display: flex; align-items: center; gap: 10px; font-size: .88rem; color: var(--stone); }
+  .ctl select { min-height: 40px; padding: 0 34px 0 12px; border: 1px solid var(--line-2); border-radius: var(--r); background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232B2D31' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 12px center no-repeat; appearance: none; color: var(--char); }
+  .ctl input[type=range] { width: 160px; accent-color: var(--wine); }
+  .ctl output { min-width: 56px; color: var(--char); font-weight: 600; }
+  .clear { margin-left: auto; border: 0; background: none; font-size: .88rem; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+  .clear[hidden] { display: none; }
+  .count { margin-top: 16px; font-size: .88rem; color: var(--stone); }
+  .grid { margin-top: 16px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 24px; }
+  .product { position: relative; display: flex; flex-direction: column; }
+  .p-media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: var(--r); background: var(--ivory); }
+  .p-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
+  .product:hover .p-media img { transform: scale(1.04); }
+  .p-tag { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 4px; background: #fff; font-size: .74rem; font-weight: 600; }
+  .p-tag.sale { background: var(--wine); color: #fff; }
+  .heart { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .94); display: grid; place-items: center; }
+  .heart svg { width: 18px; height: 18px; fill: none; stroke: var(--char); stroke-width: 1.6; transition: fill .2s, stroke .2s; }
+  .heart[aria-pressed="true"] svg { fill: var(--wine); stroke: var(--wine); }
+  .quick { position: absolute; left: 12px; right: 12px; bottom: 12px; min-height: 44px; border: 0; border-radius: var(--r); background: rgba(251, 250, 248, .96); font: 600 .88rem/1 var(--head);
+    opacity: 0; transform: translateY(8px); transition: opacity .3s var(--ease), transform .3s var(--ease), background-color .2s, color .2s; }
+  .product:hover .quick, .quick:focus-visible { opacity: 1; transform: none; }
+  .quick:hover { background: var(--char); color: var(--ivory); }
+  .p-info { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; }
+  .p-info h3 { font: 600 1rem/1.3 var(--head); letter-spacing: -0.01em; }
+  .p-info .mat { margin-top: 2px; font-size: .84rem; color: var(--stone); }
+  .stars { margin-top: 6px; display: flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--stone); }
+  .stars i { display: inline-block; width: 74px; height: 13px; background: linear-gradient(90deg, var(--char) var(--p), var(--sand) var(--p));
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 13'%3E%3Cg%3E%3Cpath id='s' d='M6.5 0l1.9 4.2 4.6.4-3.5 3 1.1 4.5-4.1-2.4-4.1 2.4 1.1-4.5-3.5-3 4.6-.4z'/%3E%3Cuse href='%23s' x='15'/%3E%3Cuse href='%23s' x='30'/%3E%3Cuse href='%23s' x='45'/%3E%3Cuse href='%23s' x='60'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 74px 13px;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 13'%3E%3Cg%3E%3Cpath id='s' d='M6.5 0l1.9 4.2 4.6.4-3.5 3 1.1 4.5-4.1-2.4-4.1 2.4 1.1-4.5-3.5-3 4.6-.4z'/%3E%3Cuse href='%23s' x='15'/%3E%3Cuse href='%23s' x='30'/%3E%3Cuse href='%23s' x='45'/%3E%3Cuse href='%23s' x='60'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 74px 13px; }
+  .price { white-space: nowrap; font-weight: 600; font-size: .98rem; text-align: right; }
+  .price s { display: block; font-size: .82rem; color: var(--stone); font-weight: 400; }
+  .price.is-sale b { color: var(--wine); }
+  .p-swatches { display: flex; gap: 6px; margin-top: 10px; }
+  .p-swatches i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line-2); }
+  .empty { grid-column: 1 / -1; padding: 64px 0; text-align: center; color: var(--stone); }
+  .empty .btn { margin-top: 16px; }
+
+  /* ---------- Rooms ---------- */
+  .rooms { padding: 96px 0; }
+  .rooms-grid { margin-top: 40px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: 220px; gap: 16px; }
+  .room { position: relative; overflow: hidden; border-radius: var(--r); border: 0; padding: 0; background: var(--sand); text-align: left; color: #fff; }
+  .room img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
+  .room::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20, 20, 22, 0) 45%, rgba(20, 20, 22, .64)); }
+  .room:hover img { transform: scale(1.05); }
+  .room span { position: absolute; z-index: 1; left: 22px; right: 22px; bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+  .room strong { font: 600 1.5rem/1 var(--head); }
+  .room small { font-size: .86rem; opacity: .9; }
+  .r1 { grid-column: span 5; grid-row: span 2; } .r2 { grid-column: span 4; } .r3 { grid-column: span 3; } .r4 { grid-column: span 3; } .r5 { grid-column: span 4; }
+
+  /* ---------- Craft ---------- */
+  .craft { background: var(--char); color: var(--ivory); padding: 104px 0; }
+  .craft-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .craft h2 { color: #fff; }
+  .craft p { margin-top: 18px; max-width: 46ch; color: rgba(243, 241, 237, .78); }
+  .craft-media { aspect-ratio: 4 / 3; border-radius: var(--r); overflow: hidden; }
+  .craft-media img { width: 100%; height: 100%; object-fit: cover; }
+  .steps { margin-top: 36px; }
+  .steps li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid rgba(243, 241, 237, .14); }
+  .steps b { font: 600 1.2rem/1 var(--head); color: #E7A9B9; }
+  .steps strong { display: block; font-family: var(--head); font-weight: 600; }
+  .steps span { font-size: .92rem; color: rgba(243, 241, 237, .72); }
+
+  /* ---------- Reviews ---------- */
+  .reviews { padding: 104px 0 24px; }
+  .quotes { margin-top: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+  .quotes figure { padding: 28px 28px 28px 0; }
+  .quotes figure + figure { padding-left: 28px; border-left: 1px solid var(--line); }
+  .quotes blockquote { font: 500 1.1rem/1.5 var(--head); letter-spacing: -0.01em; }
+  .quotes figcaption { margin-top: 16px; font-size: .88rem; color: var(--stone); }
+
+  /* ---------- Track ---------- */
+  .track { padding: 104px 0; background: var(--ivory); margin-top: 80px; }
+  .track-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .form-row { margin-top: 24px; display: flex; gap: 10px; }
+  .field-in { flex: 1; min-height: 52px; padding: 0 16px; border: 1px solid var(--line-2); border-radius: var(--r); background: #fff; }
+  .field-in[aria-invalid="true"] { border-color: var(--wine); }
+  .hint { margin-top: 8px; font-size: .86rem; color: var(--stone); min-height: 1.4em; }
+  .hint.is-error { color: var(--wine); }
+  .hint button { border: 0; background: none; padding: 0; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .timeline { padding: 32px; background: #fff; border: 1px solid var(--line); border-radius: var(--r); }
+  .timeline[hidden] { display: none; }
+  .tl-head { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .tl-head small { display: block; font-size: .82rem; color: var(--stone); }
+  .tl-head strong { font: 600 1.3rem/1.2 var(--head); }
+  .tl-steps { margin-top: 24px; }
+  .tl-steps li { position: relative; display: grid; grid-template-columns: 28px 1fr auto; gap: 14px; padding: 0 0 24px; }
+  .tl-steps li::before { content: ""; position: absolute; left: 13px; top: 24px; bottom: 0; width: 2px; background: var(--sand); }
+  .tl-steps li:last-child::before { display: none; }
+  .tl-steps li.done::before { background: var(--ok); }
+  .dot { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--sand); background: #fff; display: grid; place-items: center; }
+  .done .dot { border-color: var(--ok); background: var(--ok); color: #fff; }
+  .now .dot { border-color: var(--wine); }
+  .now .dot::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--wine); animation: pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+  .dot svg { width: 14px; height: 14px; }
+  .tl-steps strong { display: block; font-weight: 600; font-size: .95rem; }
+  .tl-steps span { font-size: .86rem; color: var(--stone); }
+  .tl-steps time { font-size: .82rem; color: var(--stone); }
+
+  /* ---------- Newsletter + footer ---------- */
+  .letter { padding: 96px 0; }
+  .letter-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: end; }
+  .letter p { margin-top: 12px; max-width: 46ch; color: var(--stone); }
+  footer { background: var(--char); color: rgba(243, 241, 237, .8); padding: 72px 0 32px; font-size: .92rem; }
+  .foot { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 40px; }
+  footer .brand { color: var(--ivory); }
+  footer .brand span { color: #E7A9B9; }
+  footer h4 { color: var(--ivory); font: 600 .95rem/1 var(--head); margin-bottom: 16px; }
+  footer li + li { margin-top: 10px; }
+  footer a { text-decoration: none; transition: color .2s; }
+  footer a:hover { color: #fff; }
+  .credits { margin-top: 40px; font-size: .78rem; line-height: 1.6; color: rgba(243, 241, 237, .5); max-width: 100ch; }
+  .foot-note { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(243, 241, 237, .14); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: .82rem; color: rgba(243, 241, 237, .55); }
+
+  /* ---------- Drawer (cart, then checkout) ---------- */
+  .scrim { position: fixed; inset: 0; z-index: 60; background: rgba(20, 20, 22, .45); opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .scrim.is-on { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; z-index: 61; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); background: var(--paper); display: flex; flex-direction: column;
+    transform: translateX(100%); transition: transform .45s var(--ease); box-shadow: -20px 0 60px -30px rgba(0, 0, 0, .4); visibility: hidden; }
+  .drawer.is-open { transform: none; visibility: visible; }
+  .drawer-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px 18px 24px; border-bottom: 1px solid var(--line); }
+  .drawer-head h2 { font-size: 1.3rem; }
+  .drawer-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .ship { padding: 14px 24px; border-bottom: 1px solid var(--line); font-size: .88rem; }
+  .bar { margin-top: 10px; height: 4px; border-radius: 2px; background: var(--sand); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--wine); transition: width .5s var(--ease); }
+  .lines { flex: 1; overflow: auto; padding: 4px 24px; }
+  .line { display: grid; grid-template-columns: 80px 1fr auto; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .line img { width: 80px; height: 96px; object-fit: cover; border-radius: 6px; }
+  .line h3 { font: 600 .95rem/1.3 var(--head); }
+  .line p { font-size: .82rem; color: var(--stone); }
+  .qty { margin-top: 8px; display: inline-flex; align-items: center; border: 1px solid var(--line-2); border-radius: var(--r); }
+  .qty button { width: 34px; height: 34px; border: 0; background: none; font-size: 1.05rem; }
+  .qty output { min-width: 26px; text-align: center; font-size: .92rem; }
+  .remove { margin-top: 8px; border: 0; background: none; font-size: .8rem; color: var(--stone); text-decoration: underline; text-underline-offset: 3px; display: block; }
+  .drawer-foot { padding: 18px 24px 22px; border-top: 1px solid var(--line); background: var(--ivory); }
+  .promo { display: flex; gap: 8px; margin-bottom: 4px; }
+  .promo input { flex: 1; min-height: 44px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: var(--r); background: #fff; text-transform: uppercase; }
+  .promo input[aria-invalid="true"] { border-color: var(--wine); }
+  .promo .btn { min-height: 44px; padding: 0 16px; }
+  .sum { display: flex; justify-content: space-between; font-size: .9rem; color: var(--stone); }
+  .sum + .sum { margin-top: 6px; }
+  .sum.disc { color: var(--ok); }
+  .sum.total { margin: 12px 0 16px; color: var(--char); font: 600 1.05rem/1.2 var(--head); }
+  .drawer-empty { margin: auto; padding: 40px 24px; text-align: center; color: var(--stone); }
+  .drawer-empty strong { display: block; font: 600 1.3rem/1.2 var(--head); color: var(--char); margin-bottom: 8px; }
+  .checkout { flex: 1; overflow: auto; padding: 18px 24px; display: grid; gap: 14px; align-content: start; }
+  .checkout .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .f { display: grid; gap: 6px; }
+  .f label, .f legend { font-size: .86rem; font-weight: 600; }
+  .f input, .f select { min-height: 46px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: var(--r); background: #fff; }
+  .f input[aria-invalid="true"] { border-color: var(--wine); }
+  .f .err { font-size: .8rem; color: var(--wine); min-height: 1.1em; }
+  .f fieldset { border: 0; }
+  .radios { display: grid; gap: 8px; }
+  .radios label { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border: 1px solid var(--line-2); border-radius: var(--r); background: #fff; font-weight: 500; cursor: pointer; }
+  .radios label:has(input:checked) { border-color: var(--char); box-shadow: 0 0 0 1px var(--char); }
+  .radios input { accent-color: var(--wine); }
+  .back { border: 0; background: none; font-size: .88rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .done-panel { margin: auto; padding: 32px 24px; text-align: center; }
+  .done-panel .tick { margin: 0 auto 18px; width: 64px; height: 64px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; }
+  .done-panel .tick svg { width: 30px; height: 30px; }
+  .done-panel strong { display: block; font: 600 1.4rem/1.25 var(--head); }
+  .done-panel p { margin: 10px 0 22px; color: var(--stone); }
+  .done-panel code { font-weight: 600; color: var(--char); }
+
+  /* ---------- Quick view ---------- */
+  .qv { margin: auto; width: min(1000px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 0; border-radius: 12px; background: var(--paper); color: var(--char); overflow: auto; }
+  .qv::backdrop { background: rgba(20, 20, 22, .5); }
+  .qv-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .qv-media { background: var(--ivory); position: relative; }
+  .qv-media img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4 / 5; }
+  .qv-body { padding: 40px 36px 32px; }
+  .qv-body .room-name { font-size: .88rem; color: var(--stone); }
+  .qv-body h2 { margin-top: 4px; font-size: 1.9rem; }
+  .qv-body .price { margin-top: 10px; text-align: left; font-size: 1.15rem; }
+  .qv-body .price s { display: inline; margin-left: 8px; }
+  .qv-body .desc { margin-top: 14px; color: var(--char-2); }
+  .opt { margin-top: 22px; }
+  .opt-label { font-size: .86rem; font-weight: 600; margin-bottom: 10px; display: flex; justify-content: space-between; }
+  .opt-label span { font-weight: 400; color: var(--stone); }
+  .finish-row { display: flex; gap: 10px; }
+  .finish { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line-2); cursor: pointer; }
+  .finish input, .size input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .finish:has(input:checked) { box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--char); }
+  .finish:has(input:focus-visible), .size:has(input:focus-visible) { outline: 2px solid var(--wine); outline-offset: 3px; }
+  .size-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .size { position: relative; min-height: 42px; padding: 0 16px; display: inline-flex; align-items: center; border: 1px solid var(--line-2); border-radius: var(--r); font-size: .88rem; font-weight: 500; cursor: pointer; }
+  .size:has(input:checked) { border-color: var(--char); background: var(--char); color: var(--ivory); }
+  .qv-buy { margin-top: 24px; display: flex; gap: 10px; }
+  .qv-buy .qty { margin: 0; height: 52px; }
+  .qv-buy .qty button { height: 50px; width: 40px; }
+  .qv-buy .btn { flex: 1; }
+  .deliver { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .88rem; color: var(--stone); }
+  .deliver select { min-height: 36px; padding: 0 28px 0 10px; border: 1px solid var(--line-2); border-radius: 6px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%232B2D31' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 9px center no-repeat; appearance: none; }
+  .deliver b { color: var(--char); }
+  .acc { margin-top: 22px; border-top: 1px solid var(--line); }
+  .acc details { border-bottom: 1px solid var(--line); }
+  .acc summary { list-style: none; display: flex; justify-content: space-between; padding: 14px 0; cursor: pointer; font: 600 .92rem/1.3 var(--head); }
+  .acc summary::-webkit-details-marker { display: none; }
+  .acc summary::after { content: "+"; font-weight: 500; transition: transform .3s; }
+  .acc details[open] summary::after { transform: rotate(45deg); }
+  .acc p { padding: 0 0 14px; font-size: .88rem; color: var(--char-2); }
+  .pairs { margin-top: 22px; }
+  .pairs-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .pairs-row button { border: 0; background: none; text-align: left; padding: 0; font-size: .82rem; }
+  .pairs-row img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; margin-bottom: 6px; }
+  .pairs-row b { display: block; font-weight: 600; }
+  .close-x { position: absolute; top: 14px; right: 14px; z-index: 2; width: 42px; height: 42px; border-radius: 50%; border: 0; background: rgba(251, 250, 248, .96); display: grid; place-items: center; }
+
+  .sd { margin: 10vh auto auto; width: min(640px, calc(100vw - 32px)); max-height: 80vh; padding: 0 0 12px; border: 0; border-radius: 12px; background: var(--paper); color: var(--char); }
+  .sd::backdrop { background: rgba(20, 20, 22, .45); }
+  .sd-bar { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 22px; border-bottom: 1px solid var(--line); }
+  .sd-bar input { flex: 1; min-height: 52px; border: 0; background: none; font-size: 1.1rem; outline: none; }
+  .sd-label { padding: 14px 24px 6px; font-size: .86rem; color: var(--stone); }
+  #searchResults { padding: 0 12px; }
+  #searchResults button { width: 100%; display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; padding: 10px 12px; border: 0; border-radius: var(--r); background: none; text-align: left; }
+  #searchResults button:hover, #searchResults button:focus-visible { background: var(--ivory); }
+  #searchResults img { width: 56px; height: 64px; object-fit: cover; border-radius: 4px; }
+  #searchResults strong { display: block; font: 600 .95rem/1.3 var(--head); }
+  #searchResults small { color: var(--stone); font-size: .82rem; }
+  #searchResults b { font-weight: 600; font-size: .9rem; }
+  #searchResults .none { padding: 16px 12px; color: var(--stone); }
+
+  .toast { position: fixed; z-index: 70; left: 50%; bottom: 24px; display: flex; align-items: center; gap: 14px; padding: 12px 14px 12px 12px; background: var(--char); color: var(--ivory);
+    border-radius: var(--r); box-shadow: 0 20px 40px -20px rgba(0, 0, 0, .6); transform: translate(-50%, 160%); visibility: hidden; transition: transform .45s var(--ease), visibility 0s .45s; max-width: calc(100vw - 32px); }
+  .toast.is-on { transform: translate(-50%, 0); visibility: visible; transition: transform .45s var(--ease); }
+  .toast img { width: 44px; height: 52px; object-fit: cover; border-radius: 4px; }
+  .toast strong { display: block; font-size: .9rem; }
+  .toast span { font-size: .82rem; opacity: .75; }
+  .toast button { margin-left: 8px; border: 0; background: none; color: #E7A9B9; font-weight: 600; font-size: .86rem; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+
+  /* ---------- Narrow ---------- */
+  @media (max-width: 1080px) {
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .promise ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .promise li:nth-child(3) { padding-left: 0; border-left: 0; }
+    .promise li:nth-child(n+3) { border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 860px) {
+    .head-inner { grid-template-columns: auto 1fr auto; }
+    .brand { justify-self: center; font-size: 1.5rem; }
+    .menu { display: none; }
+    .burger { display: inline-flex; }
+    .head.is-open .menu { display: grid; position: absolute; top: 100%; left: 0; right: 0; gap: 0; padding: 8px var(--gutter) 20px; background: var(--paper); border-bottom: 1px solid var(--line); }
+    .head.is-open .menu a { padding: 14px 0; font-size: 1.05rem; border-bottom: 1px solid var(--line); }
+    .hero-frame { min-height: 74vh; }
+    .hero-frame::after { background: linear-gradient(180deg, rgba(20, 20, 22, 0) 30%, rgba(20, 20, 22, .7) 100%); }
+    .craft-grid, .track-grid, .qv-grid, .letter-grid { grid-template-columns: minmax(0, 1fr); }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 14px; }
+    .quick { opacity: 1; transform: none; min-height: 38px; font-size: .8rem; }
+    .rooms-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 180px; }
+    .r1 { grid-column: span 2; grid-row: span 2; } .r2, .r3, .r4, .r5 { grid-column: span 1; grid-row: span 1; }
+    .room strong { font-size: 1.2rem; }
+    .room small { display: none; }
+    .quotes { grid-template-columns: minmax(0, 1fr); }
+    .quotes figure, .quotes figure + figure { padding: 24px 0; border-left: 0; }
+    .quotes figure + figure { border-top: 1px solid var(--line); }
+    .foot { grid-template-columns: 1fr 1fr; }
+    .foot > div:first-child { grid-column: 1 / -1; }
+    .qv-body { padding: 28px 20px 24px; }
+    .qv-media img { aspect-ratio: 4 / 3; }
+    .clear { margin-left: 0; }
+  }
+  @media (max-width: 520px) {
+    .promise ul { grid-template-columns: minmax(0, 1fr); }
+    .promise li, .promise li + li { padding: 20px 0; border-left: 0; }
+    .promise li + li { border-top: 1px solid var(--line); }
+    .form-row { flex-direction: column; }
+    .chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .chip { flex: none; }
+    .ctl input[type=range] { width: 120px; }
+    .p-info { flex-direction: column; gap: 4px; }
+    .price { text-align: left; }
+    .timeline { padding: 22px 18px; }
+    .checkout .two { grid-template-columns: minmax(0, 1fr); }
+    .pairs-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body class="lock">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.3-9.2C1.5 7.6 3.6 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.4 0 5.5 3.1 4.3 6.3C19.5 15.4 12 20 12 20z"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.5 6.5h11v9h-11zM13.5 9.5h4l3 3v3h-7z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z"/><path d="M8.8 12l2.2 2.2 4.2-4.4"/></symbol>
+  <symbol id="i-return" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10H8"/><path d="M8 5L4 9l4 4"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 15-14-1 10-6 15-14 15"/><path d="M5 19l7-7"/></symbol>
+</svg>
+
+<!-- Splash -->
+<div class="splash" id="splash" role="presentation">
+  <div>
+    <p class="splash-mark" aria-label="Furnigo"><span>F</span><span>u</span><span>r</span><span>n</span><span>i</span><span class="go">g</span><span class="go">o</span></p>
+    <p class="splash-line">Where luxury meets comfort</p>
+    <div class="splash-bar"><i></i></div>
+  </div>
+  <button class="splash-skip" type="button" id="skip">Skip intro</button>
+</div>
+
+<p class="announce">Free white-glove delivery on orders over $1,500</p>
+
+<header class="head" id="head">
+  <div class="wrap head-inner">
+    <nav class="menu" id="menu" aria-label="Main">
+      <a href="#shop">Shop</a>
+      <a href="#rooms">Rooms</a>
+      <a href="#craft">Craft</a>
+      <a href="#track">Track order</a>
+    </nav>
+    <button class="icon-btn burger" id="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu"><svg class="i"><use href="#i-menu"/></svg></button>
+    <a class="brand" href="#top" aria-label="Furnigo, home">Furni<span>go</span></a>
+    <div class="tools">
+      <button class="icon-btn" type="button" id="searchBtn" aria-label="Search the collection"><svg class="i"><use href="#i-search"/></svg></button>
+      <button class="icon-btn" type="button" id="wishBtn" aria-label="Show saved pieces"><svg class="i" style="fill:none;stroke:currentColor;stroke-width:1.6"><use href="#i-heart"/></svg><span class="badge" id="wishCount">0</span></button>
+      <button class="icon-btn" type="button" id="cartBtn" aria-label="Open cart" aria-controls="drawer"><svg class="i"><use href="#i-bag"/></svg><span class="badge" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-frame" id="heroFrame">
+        <img src="assets/hero.webp" width="1600" height="1280" alt="An elegant living room furnished in cream: a sofa, armchairs and a low coffee table.">
+        <div class="hero-copy">
+          <h1 id="hero-title">Where luxury meets comfort.</h1>
+          <p>Considered furniture in calm materials, made to order in small batches and placed in your home by hand.</p>
+          <div class="hero-actions">
+            <a class="btn btn--light" href="#shop">Shop the collection</a>
+            <a class="btn btn--line" href="#rooms">Shop by room</a>
+          </div>
+        </div>
+        <button class="spot" type="button" style="left:78%;top:50%" data-spot="solene" aria-label="Solene sofa: see the piece"></button>
+        <div class="spot-card" id="spotCard" role="status"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="promise" aria-label="Our promises">
+    <ul class="wrap">
+      <li><svg><use href="#i-truck"/></svg><div><strong>White-glove delivery</strong><span>Free over $1,500, placed in the room you choose</span></div></li>
+      <li><svg><use href="#i-shield"/></svg><div><strong>10-year frame warranty</strong><span>Kiln-dried hardwood, built to be kept</span></div></li>
+      <li><svg><use href="#i-return"/></svg><div><strong>30-day returns</strong><span>Collected from your door</span></div></li>
+      <li><svg><use href="#i-leaf"/></svg><div><strong>Responsibly made</strong><span>Certified wood and natural fibres</span></div></li>
+    </ul>
+  </section>
+
+  <section class="shop" id="shop" aria-labelledby="shop-title">
+    <div class="wrap">
+      <div class="shop-head">
+        <h2 id="shop-title">Pieces for every room</h2>
+        <p class="muted">Filter by room, price or material. Open any piece to choose its size and finish.</p>
+      </div>
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="Room" id="chips"></div>
+        <div class="refine">
+          <label class="ctl">Up to <input type="range" id="maxPrice" min="300" max="4000" step="100" value="4000" aria-label="Maximum price"><output id="maxOut">$4,000</output></label>
+          <label class="ctl">Material <select id="material"><option value="">Any</option><option>Bouclé</option><option>Velvet</option><option>Wood</option><option>Linen</option><option>Metal</option></select></label>
+          <label class="ctl">Sort <select id="sort"><option value="featured">Featured</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option><option value="rating">Best rated</option></select></label>
+          <button class="clear" type="button" id="clear" hidden>Clear filters</button>
+        </div>
+      </div>
+      <p class="count" id="count" aria-live="polite"></p>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="rooms" id="rooms" aria-labelledby="rooms-title">
+    <div class="wrap">
+      <h2 id="rooms-title">Start with the room</h2>
+      <div class="rooms-grid">
+        <button class="room r1" type="button" data-room="living"><img src="assets/living.webp" alt="" loading="lazy"><span><strong>Living</strong><small>Sofas, chairs, tables</small></span></button>
+        <button class="room r2" type="button" data-room="bedroom"><img src="assets/lumen.webp" alt="" loading="lazy"><span><strong>Bedroom</strong><small>Beds, sets</small></span></button>
+        <button class="room r3" type="button" data-room="dining"><img src="assets/dining.webp" alt="" loading="lazy"><span><strong>Dining</strong><small>Chairs</small></span></button>
+        <button class="room r4" type="button" data-room="office"><img src="assets/atelier.webp" alt="" loading="lazy"><span><strong>Office</strong><small>Desks</small></span></button>
+        <button class="room r5" type="button" data-room="outdoor"><img src="assets/teak.webp" alt="" loading="lazy"><span><strong>Outdoor</strong><small>Teak</small></span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="craft" id="craft" aria-labelledby="craft-title">
+    <div class="wrap craft-grid">
+      <div class="craft-media"><img src="assets/craft.webp" alt="A craftsman at work on a chair in a furniture workshop." loading="lazy"></div>
+      <div>
+        <h2 id="craft-title">Made slowly, meant to stay</h2>
+        <p>Every piece is built to order in small batches, so nothing waits in a warehouse and nothing is made that will not be loved.</p>
+        <ol class="steps">
+          <li><b>1</b><div><strong>Frame</strong><span>Kiln-dried oak and beech, joined and glued, never stapled.</span></div></li>
+          <li><b>2</b><div><strong>Comfort</strong><span>Pocket springs under layered foam and feather, tuned seat by seat.</span></div></li>
+          <li><b>3</b><div><strong>Finish</strong><span>Hand-stitched bouclé, velvet and linen, checked twice before it leaves.</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="reviews" aria-labelledby="reviews-title">
+    <div class="wrap">
+      <h2 id="reviews-title">From homes that have one</h2>
+      <div class="quotes">
+        <figure><blockquote>“The Solene is the first sofa we've had where everyone fights for the same seat.”</blockquote><figcaption>Maya R., Solene Sofa in Ivory</figcaption></figure>
+        <figure><blockquote>“Two men carried it up four floors, unwrapped it and took every piece of packaging away.”</blockquote><figcaption>Karim H., Nocturne Bed</figcaption></figure>
+        <figure><blockquote>“The velvet is softer than the photos suggest, and the colour is exactly the same.”</blockquote><figcaption>Lea S., Verde Curved Sofa in Sage</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="track" id="track" aria-labelledby="track-title">
+    <div class="wrap track-grid">
+      <div>
+        <h2 id="track-title">Where is my order?</h2>
+        <p class="muted" style="margin-top:14px;max-width:40ch">Enter the order number from your confirmation. Each piece is followed from the workshop to your door.</p>
+        <form id="trackForm" novalidate>
+          <div class="form-row">
+            <label class="sr-only" for="orderNo">Order number</label>
+            <input class="field-in" id="orderNo" placeholder="For example FG-1024" autocomplete="off" aria-describedby="trackHint">
+            <button class="btn btn--dark" type="submit">Track order</button>
+          </div>
+          <p class="hint" id="trackHint">No order yet? <button type="button" id="tryDemo">Try FG-1024</button></p>
+        </form>
+      </div>
+      <div class="timeline" id="timeline" hidden aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="letter" aria-labelledby="letter-title">
+    <div class="wrap letter-grid">
+      <div><h2 id="letter-title">New pieces, before anyone else</h2><p>One letter a month: first looks at new pieces, and how to care for the ones you have.</p></div>
+      <form id="letterForm" novalidate>
+        <div class="form-row">
+          <label class="sr-only" for="email">Email address</label>
+          <input class="field-in" id="email" type="email" placeholder="Your email address" autocomplete="email" aria-describedby="letterHint">
+          <button class="btn btn--wine" type="submit">Subscribe</button>
+        </div>
+        <p class="hint" id="letterHint"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div><a class="brand" href="#top">Furni<span>go</span></a><p style="margin-top:16px;max-width:36ch">Considered furniture in calm materials, made to order and delivered by hand.</p></div>
+      <div><h4>Shop</h4><ul><li><a href="#shop" data-go="living">Living</a></li><li><a href="#shop" data-go="bedroom">Bedroom</a></li><li><a href="#shop" data-go="dining">Dining</a></li><li><a href="#shop" data-go="office">Office</a></li></ul></div>
+      <div><h4>Help</h4><ul><li><a href="#track">Track an order</a></li><li><a href="#top">Delivery</a></li><li><a href="#top">Returns</a></li><li><a href="#top">Care guides</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="#craft">How it's made</a></li><li><a href="#top">Showrooms</a></li><li><a href="#top">Careers</a></li><li><a href="#top">Contact</a></li></ul></div>
+    </div>
+    <p class="credits">Photography from Unsplash by McFollis, The Design House, Jason Wang, Bhautik Patel, Guven Gunes, Zane Persaud, Adam Winger, Samuel Regan-Asante, Sam Moghadam, Justus Menke, Pietro Piovesan, Puscas Adryan, jessica Young, Pipcke, Kam Idris and Bailey Alexander.</p>
+    <div class="foot-note"><span>© 2026 Furnigo</span><span>A UI/UX concept by Anas Fawaz. Products and prices are illustrative.</span></div>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Your cart" aria-hidden="true">
+  <div class="drawer-head"><h2 id="drawerTitle">Your cart</h2><button class="icon-btn" type="button" id="closeCart" aria-label="Close cart"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<dialog class="qv" id="qv" aria-labelledby="qvTitle">
+  <button class="close-x" type="button" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+  <div class="qv-grid" id="qvBody"></div>
+</dialog>
+
+<dialog class="sd" id="search" aria-label="Search the collection">
+  <div class="sd-bar"><svg class="i"><use href="#i-search"/></svg><label class="sr-only" for="searchInput">Search</label><input id="searchInput" type="search" placeholder="Search sofas, oak, velvet" autocomplete="off"><button class="icon-btn" type="button" data-close aria-label="Close search"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <p class="sd-label" id="searchLabel">Popular pieces</p>
+  <ul id="searchResults" aria-live="polite"></ul>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s)
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)]
+  const money = (n) => '$' + Math.round(n).toLocaleString('en-US')
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  // ---------- Splash: once per visit, skippable ----------
+  const splash = $('#splash')
+  const endSplash = () => { if (splash.classList.contains('is-done')) return; splash.classList.add('is-done'); document.body.classList.remove('lock'); $('#heroFrame').classList.add('is-in') }
+  let seen = false; try { seen = sessionStorage.getItem('furnigo:intro') === '1'; sessionStorage.setItem('furnigo:intro', '1') } catch {}
+  if (seen) { splash.style.transition = 'none'; endSplash() } else { setTimeout(endSplash, reduce ? 300 : 2100) }
+  $('#skip').addEventListener('click', endSplash)
+  splash.addEventListener('click', endSplash)
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') endSplash() }, { once: true })
+
+  // ---------- Catalogue ----------
+  const ROOMS = { all: 'All', living: 'Living', bedroom: 'Bedroom', dining: 'Dining', office: 'Office', lighting: 'Lighting', outdoor: 'Outdoor' }
+  const SOFA = [['Two-seat', 0], ['Three-seat', 600]], BED = [['Queen', 0], ['King', 300]], TABLE = [['Small', 0], ['Large', 150]], ONE = [['One size', 0]]
+  const P = [
+    { id: 'solene', name: 'Solene Sofa', room: 'living', mat: 'Bouclé', material: 'Ivory bouclé, oak base', price: 2480, rate: 4.9, n: 214, tag: 'Bestseller', sizes: SOFA, dims: 'W 220 × D 98 × H 76 cm, seat height 44 cm', care: 'Vacuum gently; blot spills straight away. Covers are dry-clean only.',
+      desc: 'A deep, low sofa in soft bouclé, with feather-wrapped cushions that keep their shape.', finishes: [['Ivory', '#EDE7DC'], ['Sand', '#D7CCB9'], ['Stone', '#A8A39A']], pairs: ['terra', 'halo', 'ambra'] },
+    { id: 'verde', name: 'Verde Curved Sofa', room: 'living', mat: 'Velvet', material: 'Sage velvet', price: 3150, was: 3700, rate: 4.8, n: 96, sizes: SOFA, dims: 'W 240 × D 104 × H 78 cm', care: 'Brush the pile in one direction; keep out of strong sun.',
+      desc: 'A gentle curve in sage velvet with channel-stitched cushions, made for conversation.', finishes: [['Sage', '#7D8A70'], ['Bordeaux', '#7A2236'], ['Ink', '#2F3440']], pairs: ['terra', 'bordeaux', 'halo'] },
+    { id: 'ambra', name: 'Ambra Lounge Chair', room: 'living', mat: 'Bouclé', material: 'Cognac bouclé', price: 890, rate: 4.7, n: 133, tag: 'New', sizes: ONE, dims: 'W 82 × D 80 × H 74 cm', care: 'Vacuum gently; blot spills straight away.',
+      desc: 'A compact lounge chair whose rounded shell wraps around you.', finishes: [['Cognac', '#A86A45'], ['Oat', '#D9CDB8']], pairs: ['solene', 'terra', 'halo'] },
+    { id: 'dune', name: 'Dune Armchair', room: 'living', mat: 'Velvet', material: 'Terracotta velvet, tufted', price: 1940, rate: 4.6, n: 58, sizes: ONE, dims: 'W 92 × D 86 × H 98 cm', care: 'Brush the pile in one direction.',
+      desc: 'A tufted armchair in terracotta velvet, with a deep seat and a high, rolled back.', finishes: [['Terracotta', '#B9653F'], ['Mist', '#BFB8AE']], pairs: ['terra', 'solene', 'halo'] },
+    { id: 'terra', name: 'Terra Drum Table', room: 'living', mat: 'Wood', material: 'Solid elm, oiled', price: 640, rate: 4.8, n: 177, sizes: TABLE, dims: 'Small Ø 60 × H 42 cm, large Ø 80 × H 42 cm', care: 'Wipe with a damp cloth; re-oil once a year.',
+      desc: 'A turned drum of solid elm with a hidden storage well under the lid.', finishes: [['Elm', '#A0623E'], ['Smoked', '#5A3E2E']], pairs: ['solene', 'verde', 'ambra'] },
+    { id: 'nocturne', name: 'Nocturne Bed', room: 'bedroom', mat: 'Linen', material: 'Charcoal linen, tufted', price: 2260, rate: 4.9, n: 121, sizes: BED, dims: 'Queen 168 × 218 cm, king 198 × 218 cm, headboard 120 cm', care: 'Removable linen cover, cool wash.',
+      desc: 'An upholstered bed with a buttoned headboard and a quiet slatted base.', finishes: [['Charcoal', '#5E6168'], ['Linen', '#D8D2C6']], pairs: ['lumen', 'halo', 'ambra'] },
+    { id: 'bordeaux', name: 'Bordeaux Accent Chair', room: 'living', mat: 'Velvet', material: 'Red velvet, black steel legs', price: 1320, rate: 4.7, n: 64, tag: 'New', sizes: ONE, dims: 'W 70 × D 72 × H 88 cm', care: 'Brush the pile in one direction.',
+      desc: 'A sculpted shell in deep red velvet on slim steel legs: the one statement in a calm room.', finishes: [['Red', '#C0262F'], ['Forest', '#2F4A3B']], pairs: ['verde', 'terra', 'halo'] },
+    { id: 'ora', name: 'Ora Dining Chair', room: 'dining', mat: 'Linen', material: 'Grey linen, oak legs', price: 320, was: 380, rate: 4.6, n: 203, sizes: ONE, dims: 'W 52 × D 56 × H 84 cm, seat height 46 cm', care: 'Removable seat cover, cool wash.',
+      desc: 'A soft shell chair that stays comfortable through a long dinner.', finishes: [['Fog', '#9C9890'], ['Oat', '#D9CDB8']], pairs: ['halo', 'atelier', 'terra'] },
+    { id: 'atelier', name: 'Atelier Writing Desk', room: 'office', mat: 'Wood', material: 'Solid walnut', price: 1180, rate: 4.8, n: 89, sizes: [['120 cm', 0], ['150 cm', 180]], dims: 'W 120 or 150 × D 60 × H 75 cm', care: 'Wipe with a damp cloth; use a coaster for hot drinks.',
+      desc: 'A solid walnut desk with a shallow drawer and a cable channel hidden under the top.', finishes: [['Walnut', '#5E3B26'], ['Oak', '#C79A5B']], pairs: ['ora', 'halo', 'ambra'] },
+    { id: 'halo', name: 'Halo Pendant', room: 'lighting', mat: 'Metal', material: 'Spun copper', price: 280, rate: 4.7, n: 156, sizes: [['Ø 40 cm', 0], ['Ø 55 cm', 90]], dims: 'Ø 40 or 55 cm, 2 m adjustable cable', care: 'Dust with a dry cloth.',
+      desc: 'A wide copper dome that throws a warm pool of light over a table.', finishes: [['Copper', '#B4704A'], ['Black', '#2B2D31']], pairs: ['ora', 'atelier', 'terra'] },
+    { id: 'lumen', name: 'Lumen Bedroom Set', room: 'bedroom', mat: 'Linen', material: 'Bed, two side tables, lamps', price: 3890, was: 4420, rate: 4.8, n: 41, sizes: BED, dims: 'Bed as Nocturne; side tables W 45 × D 40 × H 50 cm', care: 'See each piece.',
+      desc: 'Everything for a calm bedroom: a low upholstered bed, two side tables and a pair of lamps.', finishes: [['Taupe', '#9B8B7C'], ['Linen', '#D8D2C6']], pairs: ['nocturne', 'halo', 'ambra'] },
+    { id: 'teak', name: 'Teak Lounge Set', room: 'outdoor', mat: 'Wood', material: 'Grade-A teak, outdoor cushions', price: 2740, rate: 4.7, n: 37, sizes: ONE, dims: 'Sofa W 180 cm, two chairs, table 90 × 50 cm', care: 'Leave to silver, or oil twice a year to keep the colour.',
+      desc: 'A sofa, two armchairs and a low table in solid teak that silvers beautifully with time.', finishes: [['Natural', '#B07A4B'], ['Silvered', '#A7A39B']], pairs: ['terra', 'halo', 'ambra'] },
+  ]
+  const byId = Object.fromEntries(P.map((p) => [p.id, p]))
+  const FREE = 1500, DELIVERY = 95, PROMOS = { FURNIGO10: .10, WELCOME5: .05 }
+  const CITIES = { 'Beirut': 5, 'Jounieh': 6, 'Byblos': 7, 'Tripoli': 9, 'Sidon': 8, 'Zahle': 9 }
+
+  const store = { get(k, d) { try { return JSON.parse(localStorage.getItem('furnigo2:' + k)) ?? d } catch { return d } }, set(k, v) { try { localStorage.setItem('furnigo2:' + k, JSON.stringify(v)) } catch {} } }
+  let cart = store.get('cart', []), wish = new Set(store.get('wish', [])), orders = store.get('orders', {}), promo = store.get('promo', '')
+  let room = 'all', sort = 'featured', maxPrice = 4000, material = '', wishOnly = false
+
+  // ---------- Header ----------
+  const head = $('#head'), burger = $('#burger')
+  addEventListener('scroll', () => head.classList.toggle('is-scrolled', scrollY > 10), { passive: true })
+  const setMenu = (o) => { head.classList.toggle('is-open', o); burger.setAttribute('aria-expanded', String(o)); burger.setAttribute('aria-label', o ? 'Close menu' : 'Open menu'); $('use', burger).setAttribute('href', o ? '#i-x' : '#i-menu') }
+  burger.addEventListener('click', () => setMenu(!head.classList.contains('is-open')))
+  $('#menu').addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false) })
+  const links = $$('#menu a')
+  const spy = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) links.forEach((a) => a.setAttribute('aria-current', String(a.hash === '#' + en.target.id))) }), { rootMargin: '-45% 0px -50% 0px' })
+  ;['shop', 'rooms', 'craft', 'track'].forEach((id) => spy.observe(document.getElementById(id)))
+
+  // ---------- Hero hotspots ----------
+  const spotCard = $('#spotCard')
+  $$('.spot').forEach((b) => b.addEventListener('click', (e) => {
+    e.stopPropagation(); const p = byId[b.dataset.spot]
+    spotCard.innerHTML = `<strong>${p.name}</strong><span>${p.material}, from ${money(p.price)}</span><br><button type="button">See the piece</button>`
+    spotCard.style.left = `min(calc(${b.style.left} + 22px), calc(100% - 246px))`; spotCard.style.top = `calc(${b.style.top} - 110px)`
+    spotCard.classList.add('is-open'); $('button', spotCard).onclick = () => { spotCard.classList.remove('is-open'); openQuick(p.id) }
+  }))
+  document.addEventListener('click', (e) => { if (!spotCard.contains(e.target)) spotCard.classList.remove('is-open') })
+
+  // ---------- Shop ----------
+  $('#chips').innerHTML = Object.entries(ROOMS).map(([k, v]) => `<button class="chip" type="button" data-room="${k}" aria-pressed="${k === 'all'}">${v}</button>`).join('')
+  $('#chips').addEventListener('click', (e) => { const c = e.target.closest('.chip'); if (c) { wishOnly = false; setRoom(c.dataset.room) } })
+  const maxIn = $('#maxPrice')
+  maxIn.addEventListener('input', () => { maxPrice = +maxIn.value; $('#maxOut').textContent = money(maxPrice); render() })
+  $('#material').addEventListener('change', (e) => { material = e.target.value; render() })
+  $('#sort').addEventListener('change', (e) => { sort = e.target.value; render() })
+  function setRoom(r) { room = r; $$('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.room === r))); render() }
+  function clearAll() { wishOnly = false; material = ''; $('#material').value = ''; maxPrice = 4000; maxIn.value = 4000; $('#maxOut').textContent = money(4000); setRoom('all') }
+  $('#clear').addEventListener('click', clearAll)
+
+  const stars = (p) => `<div class="stars"><i style="--p:${p.rate / 5 * 100}%" aria-hidden="true"></i><span>${p.rate} (${p.n})</span><span class="sr-only">Rated ${p.rate} out of 5 from ${p.n} reviews</span></div>`
+  const priceHtml = (p, extra = 0) => p.was ? `<p class="price is-sale"><b>${money(p.price + extra)}</b><s>${money(p.was + extra)}</s></p>` : `<p class="price">${money(p.price + extra)}</p>`
+  function render() {
+    let list = P.filter((p) => (room === 'all' || p.room === room) && p.price <= maxPrice && (!material || p.mat === material) && (!wishOnly || wish.has(p.id)))
+    const cmp = { featured: () => 0, low: (a, b) => a.price - b.price, high: (a, b) => b.price - a.price, rating: (a, b) => b.rate - a.rate }[sort]
+    list = list.slice().sort(cmp)
+    const filtered = room !== 'all' || material || maxPrice < 4000 || wishOnly
+    $('#clear').hidden = !filtered
+    $('#count').textContent = wishOnly ? `${list.length} saved ${list.length === 1 ? 'piece' : 'pieces'}` : `${list.length} ${list.length === 1 ? 'piece' : 'pieces'}`
+    $('#grid').innerHTML = list.length ? list.map((p) => `
+      <article class="product">
+        <div class="p-media">
+          <img src="assets/${p.id}.webp" alt="${p.name}, ${p.material.toLowerCase()}" loading="lazy">
+          ${p.was ? '<span class="p-tag sale">Sale</span>' : p.tag ? `<span class="p-tag">${p.tag}</span>` : ''}
+          <button class="heart" type="button" data-wish="${p.id}" aria-pressed="${wish.has(p.id)}" aria-label="Save ${p.name}"><svg><use href="#i-heart"/></svg></button>
+          <button class="quick" type="button" data-quick="${p.id}">Choose size and finish</button>
+        </div>
+        <div class="p-info"><div><h3>${p.name}</h3><p class="mat">${p.material}</p></div>${priceHtml(p)}</div>
+        ${stars(p)}
+        <div class="p-swatches" aria-label="${p.finishes.length} finishes">${p.finishes.map(([n, c]) => `<i style="background:${c}" title="${n}"></i>`).join('')}</div>
+      </article>`).join('')
+      : `<div class="empty">${wishOnly ? 'Nothing saved yet. Tap the heart on a piece to keep it here.' : 'No piece matches these filters.'}<br><button class="btn btn--line" type="button" data-clear>Clear filters</button></div>`
+  }
+  $('#grid').addEventListener('click', (e) => {
+    const w = e.target.closest('[data-wish]'), q = e.target.closest('[data-quick]'), c = e.target.closest('[data-clear]')
+    if (w) toggleWish(w.dataset.wish, w); else if (q) openQuick(q.dataset.quick); else if (c) clearAll()
+  })
+  function toggleWish(id, btn) { wish.has(id) ? wish.delete(id) : wish.add(id); store.set('wish', [...wish]); if (btn) btn.setAttribute('aria-pressed', String(wish.has(id))); badge($('#wishCount'), wish.size, true); if (wishOnly) render() }
+  $('#wishBtn').addEventListener('click', () => { wishOnly = true; room = 'all'; $$('.chip').forEach((c) => c.setAttribute('aria-pressed', 'false')); render(); $('#shop').scrollIntoView() })
+  $$('[data-room]', $('#rooms')).forEach((b) => b.addEventListener('click', () => { wishOnly = false; setRoom(b.dataset.room); $('#shop').scrollIntoView() }))
+  $$('[data-go]').forEach((a) => a.addEventListener('click', () => { wishOnly = false; setRoom(a.dataset.go) }))
+
+  // ---------- Search ----------
+  const sd = $('#search'), sq = $('#searchInput'), sr = $('#searchResults')
+  const runSearch = () => {
+    const q = sq.value.trim().toLowerCase()
+    const hits = q ? P.filter((p) => (p.name + ' ' + p.material + ' ' + ROOMS[p.room]).toLowerCase().includes(q)) : P.slice(0, 4)
+    sr.innerHTML = hits.length ? hits.map((p) => `<li><button type="button" data-hit="${p.id}"><img src="assets/${p.id}.webp" alt=""><span><strong>${p.name}</strong><small>${p.material}</small></span><b>${money(p.price)}</b></button></li>`).join('') : `<li class="none">Nothing matches "${sq.value.trim()}". Try sofa, oak or velvet.</li>`
+    $('#searchLabel').textContent = q ? `${hits.length} ${hits.length === 1 ? 'result' : 'results'}` : 'Popular pieces'
+  }
+  $('#searchBtn').addEventListener('click', () => { sq.value = ''; runSearch(); sd.showModal(); sq.focus() })
+  sq.addEventListener('input', runSearch)
+  sr.addEventListener('click', (e) => { const b = e.target.closest('[data-hit]'); if (b) { sd.close(); openQuick(b.dataset.hit) } })
+  sd.addEventListener('click', (e) => { if (e.target === sd) sd.close() })
+  $('[data-close]', sd).addEventListener('click', () => sd.close())
+
+  // ---------- Quick view: size, finish, quantity, delivery, details, pairs ----------
+  const qv = $('#qv')
+  const deliveryDate = (city) => { const d = new Date(); d.setDate(d.getDate() + 7 * CITIES[city] / 2 + 14); return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' }) }
+  function openQuick(id) {
+    const p = byId[id]; let qty = 1, size = 0
+    const draw = () => {
+      const extra = p.sizes[size][1]
+      $('#qvPrice').outerHTML = priceHtml(p, extra).replace('class="price', 'id="qvPrice" class="price')
+      $('#addBtn').textContent = `Add to cart, ${money((p.price + extra) * qty)}`
+    }
+    $('#qvBody').innerHTML = `
+      <div class="qv-media"><img src="assets/${p.id}.webp" alt="${p.name}"></div>
+      <div class="qv-body">
+        <p class="room-name">${ROOMS[p.room]}</p>
+        <h2 id="qvTitle">${p.name}</h2>
+        ${stars(p)}
+        <p id="qvPrice" class="price">${money(p.price)}</p>
+        <p class="desc">${p.desc}</p>
+        ${p.sizes.length > 1 ? `<div class="opt"><p class="opt-label">Size</p><div class="size-row">${p.sizes.map(([n, x], i) => `<label class="size"><input type="radio" name="size" value="${i}" ${i ? '' : 'checked'}>${n}${x ? ` (+${money(x)})` : ''}</label>`).join('')}</div></div>` : ''}
+        <div class="opt"><p class="opt-label">Finish <span id="finishName">${p.finishes[0][0]}</span></p><div class="finish-row">${p.finishes.map(([n, c], i) => `<label class="finish" style="background:${c}" title="${n}"><input type="radio" name="finish" value="${n}" ${i ? '' : 'checked'} aria-label="${n}"></label>`).join('')}</div></div>
+        <div class="qv-buy">
+          <div class="qty" role="group" aria-label="Quantity"><button type="button" data-step="-1" aria-label="One fewer">−</button><output id="qvQty">1</output><button type="button" data-step="1" aria-label="One more">+</button></div>
+          <button class="btn btn--wine" type="button" id="addBtn">Add to cart</button>
+        </div>
+        <p class="deliver">Delivery to <select id="city" aria-label="Delivery city">${Object.keys(CITIES).map((c) => `<option>${c}</option>`).join('')}</select> by <b id="when">${deliveryDate('Beirut')}</b></p>
+        <div class="acc">
+          <details><summary>Dimensions</summary><p>${p.dims}</p></details>
+          <details><summary>Materials and care</summary><p>${p.material}. ${p.care}</p></details>
+          <details><summary>Delivery and returns</summary><p>Made to order and delivered in 4 to 6 weeks. White-glove delivery is free over ${money(FREE)}. Return within 30 days and we collect it.</p></details>
+        </div>
+        <div class="pairs"><p class="opt-label">Pairs well with</p><div class="pairs-row">${p.pairs.map((k) => `<button type="button" data-pair="${k}"><img src="assets/${k}.webp" alt=""><b>${byId[k].name}</b>${money(byId[k].price)}</button>`).join('')}</div></div>
+      </div>`
+    $$('input[name="size"]', qv).forEach((r) => r.addEventListener('change', () => { size = +r.value; draw() }))
+    $$('input[name="finish"]', qv).forEach((r) => r.addEventListener('change', () => { $('#finishName').textContent = r.value }))
+    $$('[data-step]', qv).forEach((b) => b.addEventListener('click', () => { qty = Math.max(1, Math.min(9, qty + +b.dataset.step)); $('#qvQty').textContent = qty; draw() }))
+    $('#city').addEventListener('change', (e) => { $('#when').textContent = deliveryDate(e.target.value) })
+    $('#addBtn').addEventListener('click', () => { addToCart(p.id, p.sizes[size][0], $('input[name="finish"]:checked', qv).value, qty, p.sizes[size][1]); qv.close() })
+    $$('[data-pair]', qv).forEach((b) => b.addEventListener('click', () => openQuick(b.dataset.pair)))
+    draw(); if (!qv.open) qv.showModal(); qv.scrollTop = 0
+  }
+  $('[data-close]', qv).addEventListener('click', () => qv.close())
+  qv.addEventListener('click', (e) => { if (e.target === qv) qv.close() })
+
+  // ---------- Cart, promo and checkout ----------
+  const drawer = $('#drawer'), scrim = $('#scrim'), body = $('#drawerBody')
+  let lastFocus = null
+  function addToCart(id, size, finish, qty, extra) {
+    const line = cart.find((l) => l.id === id && l.finish === finish && l.size === size)
+    line ? (line.qty = Math.min(9, line.qty + qty)) : cart.push({ id, size, finish, qty, extra })
+    save(); const p = byId[id]
+    showToast(p, 'Added to cart', `${p.name}, ${size === 'One size' ? '' : size + ', '}${finish}${qty > 1 ? ' × ' + qty : ''}`, true)
+  }
+  function save() { store.set('cart', cart); store.set('promo', promo); badge($('#cartCount'), cart.reduce((n, l) => n + l.qty, 0), true); if (drawer.classList.contains('is-open') && !body.dataset.step) drawCart() }
+  function badge(el, n, bump) { el.textContent = n; el.classList.toggle('is-on', n > 0); if (bump && n) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump') } }
+  const sums = () => {
+    const sub = cart.reduce((s, l) => s + (byId[l.id].price + (l.extra || 0)) * l.qty, 0)
+    const disc = PROMOS[promo] ? sub * PROMOS[promo] : 0, after = sub - disc, del = after >= FREE ? 0 : DELIVERY
+    return { sub, disc, del, total: after + del }
+  }
+  function drawCart() {
+    delete body.dataset.step; $('#drawerTitle').textContent = 'Your cart'
+    if (!cart.length) { body.innerHTML = `<div class="drawer-empty"><strong>Your cart is empty</strong>Pieces you add will wait here.<br><br><button class="btn btn--line" type="button" id="keepShopping">Browse the collection</button></div>`; $('#keepShopping').onclick = () => { closeCart(); $('#shop').scrollIntoView() }; return }
+    const s = sums(), left = Math.max(0, FREE - (s.sub - s.disc))
+    body.innerHTML = `
+      <div class="ship">${left ? `You are <strong>${money(left)}</strong> away from free white-glove delivery.` : '<strong>Free white-glove delivery</strong> is included.'}<div class="bar"><i style="width:${Math.min(100, (s.sub - s.disc) / FREE * 100)}%"></i></div></div>
+      <div class="lines">${cart.map((l, i) => { const p = byId[l.id]; return `
+        <div class="line"><img src="assets/${p.id}.webp" alt="">
+          <div><h3>${p.name}</h3><p>${l.size === 'One size' ? '' : l.size + ', '}${l.finish}</p>
+            <div class="qty" role="group" aria-label="Quantity of ${p.name}"><button type="button" data-q="${i}" data-d="-1" aria-label="One fewer">−</button><output>${l.qty}</output><button type="button" data-q="${i}" data-d="1" aria-label="One more">+</button></div>
+            <button class="remove" type="button" data-rm="${i}">Remove</button></div>
+          <p class="price">${money((p.price + (l.extra || 0)) * l.qty)}</p></div>` }).join('')}</div>
+      <div class="drawer-foot">
+        <form class="promo" id="promoForm" novalidate><label class="sr-only" for="promoIn">Promo code</label><input id="promoIn" placeholder="Promo code" value="${promo}" aria-describedby="promoHint"><button class="btn btn--line" type="submit">Apply</button></form>
+        <p class="hint" id="promoHint" style="margin:0 0 10px">${promo ? `${promo} applied: ${PROMOS[promo] * 100}% off.` : 'Try FURNIGO10 for 10% off.'}</p>
+        <div class="sum"><span>Subtotal</span><span>${money(s.sub)}</span></div>
+        ${s.disc ? `<div class="sum disc"><span>Discount</span><span>−${money(s.disc)}</span></div>` : ''}
+        <div class="sum"><span>Delivery</span><span>${s.del ? money(s.del) : 'Free'}</span></div>
+        <div class="sum total"><span>Total</span><span>${money(s.total)}</span></div>
+        <button class="btn btn--dark btn--block" type="button" id="toCheckout">Check out</button>
+      </div>`
+    $$('[data-q]', body).forEach((b) => b.onclick = () => { const l = cart[+b.dataset.q]; l.qty += +b.dataset.d; if (l.qty < 1) cart.splice(+b.dataset.q, 1); save() })
+    $$('[data-rm]', body).forEach((b) => b.onclick = () => { cart.splice(+b.dataset.rm, 1); save() })
+    $('#promoForm').addEventListener('submit', (e) => {
+      e.preventDefault(); const code = $('#promoIn').value.trim().toUpperCase()
+      if (!code) { promo = ''; save(); return }
+      if (!PROMOS[code]) { $('#promoIn').setAttribute('aria-invalid', 'true'); const h = $('#promoHint'); h.className = 'hint is-error'; h.textContent = `"${code}" is not a valid code. Check the spelling, or try FURNIGO10.`; return }
+      promo = code; save()
+    })
+    $('#toCheckout').onclick = drawCheckout
+  }
+  function drawCheckout() {
+    body.dataset.step = 'checkout'; $('#drawerTitle').textContent = 'Delivery and payment'
+    const s = sums()
+    body.innerHTML = `<form class="checkout" id="coForm" novalidate>
+      <button class="back" type="button" id="backToCart">Back to cart</button>
+      <div class="two"><div class="f"><label for="coName">Full name</label><input id="coName" autocomplete="name"><p class="err" id="eName"></p></div>
+      <div class="f"><label for="coPhone">Phone</label><input id="coPhone" inputmode="tel" autocomplete="tel"><p class="err" id="ePhone"></p></div></div>
+      <div class="f"><label for="coAddr">Street and building</label><input id="coAddr" autocomplete="street-address"><p class="err" id="eAddr"></p></div>
+      <div class="f"><label for="coCity">City</label><select id="coCity">${Object.keys(CITIES).map((c) => `<option>${c}</option>`).join('')}</select></div>
+      <fieldset class="f"><legend>Delivery time</legend><div class="radios"><label><input type="radio" name="slot" value="Morning, 9 to 12" checked>Morning, 9 to 12</label><label><input type="radio" name="slot" value="Afternoon, 12 to 5">Afternoon, 12 to 5</label><label><input type="radio" name="slot" value="Evening, 5 to 8">Evening, 5 to 8</label></div></fieldset>
+      <fieldset class="f"><legend>Payment</legend><div class="radios"><label><input type="radio" name="pay" value="Card on delivery" checked>Card on delivery</label><label><input type="radio" name="pay" value="Cash on delivery">Cash on delivery</label></div></fieldset>
+      <div class="sum total" style="margin:6px 0 0"><span>Total</span><span>${money(s.total)}</span></div>
+      <button class="btn btn--wine btn--block" type="submit">Place order, ${money(s.total)}</button>
+    </form>`
+    $('#backToCart').onclick = drawCart
+    const rules = { coName: [(v) => v.trim().split(/\s+/).length >= 2, 'Enter your first and last name.', 'eName'], coPhone: [(v) => v.replace(/\D/g, '').length >= 7, 'Enter a phone number with at least 7 digits.', 'ePhone'], coAddr: [(v) => v.trim().length >= 6, 'Enter the street and building.', 'eAddr'] }
+    const check = (id) => { const [ok, msg, err] = rules[id], el = $('#' + id), good = ok(el.value); el.toggleAttribute('aria-invalid', !good); $('#' + err).textContent = good ? '' : msg; return good }
+    Object.keys(rules).forEach((id) => { $('#' + id).addEventListener('blur', () => { if ($('#' + id).value) check(id) }); $('#' + id).addEventListener('input', () => { if ($('#' + id).hasAttribute('aria-invalid')) check(id) }) })
+    $('#coForm').addEventListener('submit', (e) => {
+      e.preventDefault()
+      const bad = Object.keys(rules).filter((id) => !check(id)); if (bad.length) { $('#' + bad[0]).focus(); return }
+      const no = 'FG-' + (1100 + Math.floor(Math.random() * 8900)), t = sums().total
+      orders[no] = { items: cart.map((l) => ({ ...l })), total: t, at: Date.now(), city: $('#coCity').value, slot: $('input[name="slot"]:checked').value }; store.set('orders', orders)
+      cart = []; promo = ''; store.set('cart', cart); store.set('promo', ''); badge($('#cartCount'), 0)
+      body.dataset.step = 'done'; $('#drawerTitle').textContent = 'Order placed'
+      body.innerHTML = `<div class="done-panel"><div class="tick"><svg><use href="#i-check"/></svg></div><strong>Thank you, ${$('#coName').value.trim().split(' ')[0]}.</strong><p>Order <code>${no}</code>, ${money(t)}.<br>Delivery to ${orders[no].city}, ${orders[no].slot.toLowerCase()}.</p><button class="btn btn--dark btn--block" type="button" id="trackIt">Track this order</button></div>`
+      $('#trackIt').onclick = () => { closeCart(); $('#orderNo').value = no; track(no); $('#track').scrollIntoView() }
+    })
+    $('#coName').focus()
+  }
+  function openCart() { lastFocus = document.activeElement; drawCart(); drawer.classList.add('is-open'); drawer.setAttribute('aria-hidden', 'false'); scrim.classList.add('is-on'); document.body.classList.add('lock'); $('#closeCart').focus() }
+  function closeCart() { drawer.classList.remove('is-open'); drawer.setAttribute('aria-hidden', 'true'); scrim.classList.remove('is-on'); document.body.classList.remove('lock'); lastFocus?.focus?.() }
+  $('#cartBtn').addEventListener('click', openCart)
+  $('#closeCart').addEventListener('click', closeCart)
+  scrim.addEventListener('click', closeCart)
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (drawer.classList.contains('is-open')) closeCart(); if (head.classList.contains('is-open')) setMenu(false) } })
+
+  // ---------- Toast ----------
+  const toast = $('#toast'); let tt
+  function showToast(p, title, text, withCart) {
+    toast.innerHTML = `${p ? `<img src="assets/${p.id}.webp" alt="">` : ''}<div><strong>${title}</strong><span>${text}</span></div>${withCart ? '<button type="button">View cart</button>' : ''}`
+    if (withCart) $('button', toast).onclick = () => { toast.classList.remove('is-on'); openCart() }
+    toast.classList.add('is-on'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('is-on'), 4200)
+  }
+
+  // ---------- Tracking ----------
+  const STAGES = [['Order placed', 'We have your order and your finish'], ['In the workshop', 'Your piece is being built to order'], ['Quality check', 'Inspected and wrapped by hand'], ['Out for delivery', 'Our team will call to arrange a time'], ['Delivered', 'Placed in your room and unpacked']]
+  function track(raw) {
+    const no = raw.trim().toUpperCase(), hint = $('#trackHint'), input = $('#orderNo'), tl = $('#timeline')
+    if (!/^FG-\d{4}$/.test(no)) { input.setAttribute('aria-invalid', 'true'); hint.className = 'hint is-error'; hint.textContent = 'Order numbers look like FG-1024: FG, a dash and four digits.'; tl.hidden = true; return }
+    const placed = orders[no]
+    if (!placed && no !== 'FG-1024') { input.setAttribute('aria-invalid', 'true'); hint.className = 'hint is-error'; hint.textContent = `We could not find ${no}. Check the number in your confirmation, or try FG-1024.`; tl.hidden = true; return }
+    input.removeAttribute('aria-invalid'); hint.className = 'hint'; hint.textContent = ''
+    const at = placed ? placed.at : Date.now() - 9 * 864e5, stage = placed ? 0 : 3
+    const fmt = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    const items = placed ? placed.items.map((l) => `${byId[l.id].name} (${l.finish})${l.qty > 1 ? ' × ' + l.qty : ''}`).join(', ') : 'Solene Sofa (Ivory), Terra Drum Table (Elm)'
+    tl.innerHTML = `<div class="tl-head"><div><small>Order</small><strong>${no}</strong></div><div style="text-align:right"><small>Estimated delivery</small><strong>${fmt(at + 35 * 864e5)}</strong></div></div>
+      <p class="muted" style="margin-top:16px;font-size:.9rem">${items}</p>
+      <ol class="tl-steps">${STAGES.map(([t, s], i) => `<li class="${i < stage ? 'done' : i === stage ? 'now' : ''}"><span class="dot">${i < stage ? '<svg><use href="#i-check"/></svg>' : ''}</span><div><strong>${t}</strong><span>${s}</span></div><time>${i <= stage ? fmt(at + i * 7 * 864e5) : ''}</time></li>`).join('')}</ol>`
+    tl.hidden = false
+  }
+  $('#trackForm').addEventListener('submit', (e) => { e.preventDefault(); track($('#orderNo').value) })
+  $('#tryDemo').addEventListener('click', () => { $('#orderNo').value = 'FG-1024'; track('FG-1024') })
+
+  // ---------- Newsletter ----------
+  $('#letterForm').addEventListener('submit', (e) => {
+    e.preventDefault(); const input = $('#email'), hint = $('#letterHint')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(input.value.trim())) { input.setAttribute('aria-invalid', 'true'); hint.className = 'hint is-error'; hint.textContent = 'Enter an email address, like name@example.com.'; return }
+    input.removeAttribute('aria-invalid'); hint.className = 'hint'; hint.textContent = `Subscribed. The next letter goes to ${input.value.trim()}.`; input.value = ''
+  })
+
+  render(); badge($('#cartCount'), cart.reduce((n, l) => n + l.qty, 0)); badge($('#wishCount'), wish.size)
+})()
+</script>
+</body>
+</html>

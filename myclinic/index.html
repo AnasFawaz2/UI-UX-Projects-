@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyClinic — Today at the clinic</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2032%2032'%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%229%22%20fill%3D%22%230E5A47%22%2F%3E%3Cpath%20d%3D%22M12.5%206.5h7v6h6v7h-6v6h-7v-6h-6v-7h6z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M3.5%2017h6.5l2-4.2%203.2%208.4%203.1-6.2%201.9%202h8.3%22%20fill%3D%22none%22%20stroke%3D%22%235FD3AE%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
+<meta name="description" content="MyClinic: a tablet-first app for a private clinic. Today's queue, patient records and urgent-case triage. A UI/UX concept by Anas Fawaz.">
+<meta name="theme-color" content="#0E5A47">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* MyClinic. A working app, not a page about one. Pine frames the work, red appears only for an urgent
+     patient and amber only for someone waiting, so colour always means something. Atkinson Hyperlegible
+     because the doctor reads this between patients, at arm's length. */
+  :root {
+    --pine: #0E5A47;
+    --pine-2: #0B4A3A;
+    --mint: #D8F3EA;
+    --paper: #F7F8F6;
+    --white: #FFFFFF;
+    --ink: #14231E;
+    --muted: #5B6B65;
+    --line: #DCE3E0;
+    --urgent: #C8372D;
+    --urgent-soft: #FBE9E7;
+    --wait: #B7791F;
+    --wait-soft: #FBF1DF;
+    --done: #2F7D57;
+    --font: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font: 400 1rem/1.5 var(--font); color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  ul { list-style: none; }
+  :focus-visible { outline: 3px solid #5FC4A3; outline-offset: 2px; border-radius: 6px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------- Shell ---------- */
+  .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+  .rail { position: sticky; top: 0; height: 100vh; background: var(--pine); color: #E4F3EE; padding: 22px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 22px; font-weight: 700; font-size: 1.25rem; color: #fff; }
+  .brand svg { width: 38px; height: 38px; flex: none; }
+  .brand > span { display: grid; line-height: 1.1; letter-spacing: -0.01em; font-size: 1.25rem; }
+  .brand b { font-weight: 700; }
+  .brand-my { font-weight: 400; color: #BFE8DA; }
+  .brand small { font-size: .72rem; font-weight: 400; color: #9FCBBB; letter-spacing: .02em; margin-top: 3px; }
+  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #CFE6DE; text-align: left; font-weight: 700; }
+  .nav-btn svg { width: 22px; height: 22px; flex: none; }
+  .nav-btn:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+  .nav-btn[aria-current="page"] { background: #fff; color: var(--pine); }
+  .nav-btn b { margin-left: auto; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px; background: var(--urgent); color: #fff; font-size: .8rem; line-height: 24px; text-align: center; }
+  .rail-foot { margin-top: auto; padding: 14px 10px 0; border-top: 1px solid rgba(255, 255, 255, .14); font-size: .88rem; color: #B9D8CD; }
+  .rail-foot strong { display: block; color: #fff; }
+  .reset { margin-top: 12px; border: 0; background: none; color: #B9D8CD; text-decoration: underline; text-underline-offset: 3px; font-size: .85rem; padding: 0; }
+
+  .main { min-width: 0; display: flex; flex-direction: column; }
+  .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 0 28px; background: rgba(247, 248, 246, .94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .top h1 { font-size: 1.5rem; font-weight: 700; }
+  .top .date { color: var(--muted); }
+  .search { margin-left: auto; position: relative; width: min(320px, 40vw); }
+  .search input { width: 100%; min-height: 44px; padding: 0 14px 0 40px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .search svg { position: absolute; left: 12px; top: 50%; width: 18px; height: 18px; margin-top: -9px; color: var(--muted); }
+  .menu-btn { display: none; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; background: #fff; align-items: center; justify-content: center; }
+  .menu-btn svg { width: 20px; height: 20px; }
+  .content { padding: 24px 28px 48px; }
+  .view[hidden] { display: none; }
+
+  /* ---------- Today ---------- */
+  .counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .counts button { border: 0; background: none; padding: 18px 22px; text-align: left; display: grid; gap: 2px; border-right: 1px solid var(--line); transition: background-color .15s; }
+  .counts button:last-child { border-right: 0; }
+  .counts button:hover { background: #F2F6F4; }
+  .counts button[aria-pressed="true"] { background: var(--mint); }
+  .counts strong { font-size: 2.2rem; line-height: 1.05; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .counts span { color: var(--muted); font-weight: 700; font-size: .95rem; }
+  .counts .is-urgent strong { color: var(--urgent); }
+  .counts .is-wait strong { color: var(--wait); }
+  .split { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 22px; align-items: start; }
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: 14px; }
+  .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .panel-head h2 { font-size: 1.15rem; }
+  .panel-head p { color: var(--muted); font-size: .9rem; }
+  .queue li + li { border-top: 1px solid var(--line); }
+  .appt { width: 100%; display: grid; grid-template-columns: 62px 1fr auto; gap: 14px; align-items: center; padding: 14px 20px; border: 0; background: none; text-align: left; position: relative; }
+  .appt:hover { background: #F6F9F8; }
+  .appt[aria-current="true"] { background: var(--mint); }
+  .appt.is-urgent::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--urgent); }
+  .appt time { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .appt strong { display: block; font-size: 1.05rem; }
+  .appt small { color: var(--muted); font-size: .88rem; }
+  .status { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px; border-radius: 14px; font-size: .82rem; font-weight: 700; white-space: nowrap; }
+  .st-scheduled { background: #EEF2F0; color: var(--muted); }
+  .st-waiting { background: var(--wait-soft); color: #8A5A12; }
+  .st-in { background: var(--mint); color: var(--pine-2); }
+  .st-done { background: #E6F2EB; color: var(--done); }
+  .flag { background: var(--urgent-soft); color: var(--urgent); }
+  .empty { padding: 32px 20px; color: var(--muted); text-align: center; }
+
+  .detail { position: sticky; top: 96px; }
+  .who { padding: 20px; display: grid; gap: 4px; border-bottom: 1px solid var(--line); }
+  .who-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .who h2 { font-size: 1.5rem; }
+  .who p { color: var(--muted); }
+  .allergy { margin-top: 8px; padding: 8px 12px; border-radius: 10px; background: var(--urgent-soft); color: var(--urgent); font-weight: 700; font-size: .9rem; }
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line); background: #fff; font-weight: 700; font-size: .95rem; }
+  .btn:hover { border-color: var(--pine); }
+  .btn--pine { background: var(--pine); border-color: var(--pine); color: #fff; }
+  .btn--pine:hover { background: var(--pine-2); }
+  .btn--urgent { color: var(--urgent); border-color: #F0C2BD; }
+  .btn--urgent[aria-pressed="true"] { background: var(--urgent); border-color: var(--urgent); color: #fff; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .vitals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+  .vitals div { padding: 14px 20px; border-right: 1px solid var(--line); }
+  .vitals div:last-child { border-right: 0; }
+  .vitals span { display: block; color: var(--muted); font-size: .82rem; font-weight: 700; }
+  .vitals strong { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+  .vitals strong.high { color: var(--urgent); }
+  .block { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .block:last-child { border-bottom: 0; }
+  .block h3 { font-size: .95rem; color: var(--muted); margin-bottom: 6px; }
+  .block ul { display: grid; gap: 4px; }
+  .vital-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 8px; align-items: end; }
+  .vital-form label { display: grid; gap: 4px; font-size: .82rem; font-weight: 700; color: var(--muted); }
+  .vital-form input { min-height: 42px; width: 100%; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; }
+
+  /* ---------- Patients ---------- */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: .85rem; color: var(--muted); padding: 12px 20px; border-bottom: 1px solid var(--line); }
+  td { padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: #F6F9F8; }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  /* ---------- New patient ---------- */
+  .form-wrap { max-width: 860px; }
+  .tabs { display: flex; gap: 4px; padding: 6px; background: #EEF2F0; border-radius: 12px; width: fit-content; }
+  .tabs button { min-height: 40px; padding: 0 18px; border: 0; border-radius: 9px; background: none; font-weight: 700; color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: #fff; color: var(--pine); box-shadow: 0 1px 2px rgba(20, 35, 30, .12); }
+  .tabs button .tick { color: var(--done); }
+  .fields { margin-top: 18px; padding: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .fields[hidden] { display: none; }
+  .fields .wide { grid-column: 1 / -1; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-weight: 700; }
+  .field input, .field select, .field textarea { min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .field textarea { min-height: 96px; resize: vertical; }
+  .field [aria-invalid="true"] { border-color: var(--urgent); }
+  .field .err { color: var(--urgent); font-size: .88rem; min-height: 1.2em; }
+  .seg { display: flex; gap: 8px; flex-wrap: wrap; }
+  .seg label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 700; cursor: pointer; }
+  .seg label:has(input:checked) { border-color: var(--pine); background: var(--mint); color: var(--pine-2); }
+  .seg label.is-urgent:has(input:checked) { border-color: var(--urgent); background: var(--urgent-soft); color: var(--urgent); }
+  .seg input { accent-color: var(--pine); }
+  .form-foot { margin-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
+  .wait { display: block; margin-top: 2px; font-size: .82rem; font-weight: 700; color: var(--wait); }
+  .wait.long { color: var(--urgent); }
+  .notes { width: 100%; min-height: 84px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; resize: vertical; }
+  .rx { display: grid; gap: 6px; margin: 4px 0 10px; }
+  .rx li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: #F2F6F4; font-size: .92rem; }
+  .rx li button { border: 0; background: none; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; font-size: .82rem; }
+  .rx-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+  .rx-form input, .rx-form select { min-height: 42px; width: 100%; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  .row-acts { margin-top: 10px; display: flex; align-items: center; gap: 12px; }
+  .saved { font-size: .85rem; color: var(--done); font-weight: 700; }
+  .muted-p { color: var(--muted); }
+  .hint-p { font-size: .85rem; color: var(--muted); }
+  .link { border: 0; background: none; padding: 0; color: var(--pine); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+  .dlg { margin: auto; width: min(520px, calc(100vw - 32px)); padding: 26px; border: 0; border-radius: 16px; background: #fff; color: var(--ink); box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .5); }
+  .dlg::backdrop { background: rgba(20, 35, 30, .45); }
+  .dlg h2 { font-size: 1.35rem; }
+  .dlg .field { margin-top: 14px; display: grid; gap: 6px; }
+  .dlg .field label { font-weight: 700; }
+  .dlg .field input, .dlg .field select { min-height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .dlg .field [aria-invalid="true"] { border-color: var(--urgent); }
+  .dlg .err { color: var(--urgent); font-size: .85rem; min-height: 1.1em; }
+  .dlg-foot { margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px; }
+  .sum-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .sum-split { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); }
+  .sum-list li { padding: 14px 20px; border-top: 1px solid var(--line); }
+  .sum-list li:first-child { border-top: 0; }
+  .sum-list strong { display: block; }
+  .sum-list p { color: var(--muted); font-size: .92rem; margin-top: 2px; }
+  .sum-list .rxs { margin-top: 6px; font-size: .88rem; color: var(--pine); font-weight: 700; }
+  .sum-counts button { cursor: default; }
+  .sum-counts button:hover { background: none; }
+  @media print {
+    .rail, .top, .sum-head .btn, .file-acts, .back, .toast { display: none !important; }
+    .file-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    .app { display: block; }
+    .content { padding: 0; }
+    .panel { break-inside: avoid; }
+    #v-today, #v-patients, #v-new { display: none !important; }
+  }
+  @media (max-width: 860px) { .sum-split { grid-template-columns: minmax(0, 1fr); } }
+  .back { margin-bottom: 14px; display: inline-flex; }
+  .file-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding: 20px; }
+  .file-top h2 { font-size: 1.6rem; }
+  .file-top p { color: var(--muted); }
+  .file-top .allergy { display: inline-block; }
+  .file-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .file-stats { margin-top: 16px; }
+  .file-stats strong { font-size: 1.5rem; }
+  .file-grid { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+  .file-col { display: grid; gap: 22px; min-width: 0; }
+  .progress { padding: 16px 20px 0; display: grid; gap: 6px; }
+  .progress p { max-width: 68ch; }
+  .progress .good { color: var(--done); font-weight: 700; }
+  .progress .bad { color: var(--urgent); font-weight: 700; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; padding: 14px 20px 0; font-size: .85rem; font-weight: 700; color: var(--muted); }
+  .legend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .chart { position: relative; padding: 6px 20px 18px; }
+  .chart svg { display: block; width: 100%; height: 220px; overflow: visible; }
+  .chart .ax { fill: var(--muted); font-size: 11px; }
+  .chart .dl { fill: var(--ink); font-size: 12px; font-weight: 700; }
+  .chart .hit { fill: transparent; cursor: crosshair; }
+  .chart .hit:focus { outline: none; }
+  .chart .hit:focus-visible { fill: rgba(14, 90, 71, .06); }
+  .tip { position: absolute; z-index: 2; pointer-events: none; padding: 8px 10px; border-radius: 8px; background: var(--ink); color: #fff; font-size: .82rem; line-height: 1.45; white-space: nowrap; transform: translate(-50%, 0); opacity: 0; transition: opacity .12s; }
+  .tip.on { opacity: 1; }
+  .tip b { display: block; }
+  .timeline li { padding: 16px 20px; border-top: 1px solid var(--line); display: grid; gap: 4px; }
+  .timeline li:first-child { border-top: 0; }
+  .tl-date { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-weight: 700; }
+  .tl-dx { color: var(--pine-2); font-weight: 700; }
+  .tl-meta { color: var(--muted); font-size: .9rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip { padding: 4px 10px; border-radius: 8px; background: #F2F6F4; font-size: .85rem; }
+  .chip.high { background: var(--urgent-soft); color: var(--urgent); font-weight: 700; }
+  .rows li { padding: 12px 20px; border-top: 1px solid var(--line); }
+  .rows li:first-child { border-top: 0; }
+  .rows small { display: block; color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+  .lab-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .seen { color: var(--muted); font-size: .92rem; }
+  @media (max-width: 1100px) { .file-grid { grid-template-columns: minmax(0, 1fr); } }
+  .toast { position: fixed; z-index: 50; right: 24px; bottom: 24px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; background: var(--ink); color: #fff; box-shadow: 0 16px 40px -16px rgba(0, 0, 0, .5);
+    transform: translateY(140%); visibility: hidden; transition: transform .35s var(--ease), visibility 0s .35s; max-width: calc(100vw - 32px); }
+  .toast.is-on { transform: none; visibility: visible; transition: transform .35s var(--ease); }
+  .toast button { border: 0; background: none; color: #8FE0C3; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---------- Narrow: tablet portrait, then phone ---------- */
+  @media (max-width: 1100px) {
+    .split { grid-template-columns: minmax(0, 1fr); }
+    .detail { position: static; }
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .rail { position: fixed; z-index: 40; left: 0; top: 0; width: 260px; transform: translateX(-100%); transition: transform .3s var(--ease); }
+    .app.nav-open .rail { transform: none; box-shadow: 20px 0 60px -20px rgba(0, 0, 0, .5); }
+    .menu-btn { display: inline-flex; }
+    .top { padding: 0 16px; gap: 12px; }
+    .top .date { display: none; }
+    .search { width: auto; flex: 1; }
+    .content { padding-left: 16px; padding-right: 16px; }
+    .counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .counts button:nth-child(2) { border-right: 0; }
+    .counts button:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    .vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vitals div:nth-child(2) { border-right: 0; }
+    .vitals div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    .vital-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vital-form .btn { grid-column: 1 / -1; }
+    .fields { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+    .hide-sm { display: none; }
+    .top h1 { font-size: 1.2rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="9" fill="#fff"/><path d="M12.5 6.5h7v6h6v7h-6v6h-7v-6h-6v-7h6z" fill="#0E5A47"/><path d="M3.5 17h6.5l2-4.2 3.2 8.4 3.1-6.2 1.9 2h8.3" fill="none" stroke="#5FD3AE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-today" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-people" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.4 3.4 0 0 1 0 6.4M18 14.8c1.8.7 3 2.5 3.5 5.2"/></symbol>
+  <symbol id="i-add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.5 3.4-5.5 6.5-5.5 1.3 0 2.6.3 3.6 1M18.5 13v7M15 16.5h7"/></symbol>
+  <symbol id="i-report" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <nav class="rail" aria-label="MyClinic">
+    <div class="brand"><svg aria-hidden="true"><use href="#i-logo"/></svg><span><b><span class="brand-my">My</span>Clinic</b><small>Private clinic</small></span></div>
+    <button class="nav-btn" type="button" data-nav="today" aria-current="page"><svg aria-hidden="true"><use href="#i-today"/></svg>Today<b id="urgentBadge" hidden>0</b></button>
+    <button class="nav-btn" type="button" data-nav="patients"><svg aria-hidden="true"><use href="#i-people"/></svg>Patients</button>
+    <button class="nav-btn" type="button" data-nav="new"><svg aria-hidden="true"><use href="#i-add"/></svg>New patient</button>
+    <button class="nav-btn" type="button" data-nav="summary"><svg aria-hidden="true"><use href="#i-report"/></svg>Day summary</button>
+    <div class="rail-foot"><strong>Dr. Ramzi K.</strong>Internal medicine<br><button class="reset" type="button" id="reset">Start the day over</button></div>
+  </nav>
+
+  <div class="main">
+    <header class="top">
+      <button class="menu-btn" type="button" id="menuBtn" aria-label="Open navigation" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
+      <h1 id="title">Today</h1>
+      <span class="date" id="date"></span>
+      <div class="search"><svg aria-hidden="true"><use href="#i-search"/></svg><label class="sr-only" for="q">Search patients</label><input id="q" type="search" placeholder="Search patients" autocomplete="off"></div>
+    </header>
+
+    <div class="content">
+      <!-- Today -->
+      <section class="view" id="v-today" aria-labelledby="title">
+        <div class="counts" role="group" aria-label="Show patients by status" id="counts"></div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><div><h2>Appointments</h2><p id="queueNote">In time order. Urgent patients come first.</p></div><button class="btn" type="button" id="bookBtn">Book appointment</button></div>
+            <ul class="queue" id="queue"></ul>
+          </div>
+          <div class="panel detail" id="detail" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Patients -->
+      <section class="view" id="v-patients" hidden>
+        <div class="panel">
+          <div class="panel-head"><div><h2>All patients</h2><p id="patCount"></p></div><button class="btn btn--pine" type="button" data-nav="new">New patient</button></div>
+          <table><thead><tr><th>Name</th><th class="hide-sm">Age</th><th class="hide-sm">Visits</th><th class="hide-sm">Last visit</th><th>Today</th></tr></thead><tbody id="patients"></tbody></table>
+        </div>
+      </section>
+
+      <!-- Patient file -->
+      <section class="view" id="v-file" hidden>
+        <button class="link back" type="button" data-nav="patients">All patients</button>
+        <div id="file"></div>
+      </section>
+
+      <!-- New patient -->
+      <section class="view form-wrap" id="v-new" hidden>
+        <form id="newForm" novalidate>
+          <div class="tabs" role="tablist" aria-label="Patient details">
+            <button type="button" role="tab" aria-selected="true" aria-controls="t1" data-tab="t1">Basic info</button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="t2" data-tab="t2">Medical history</button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="t3" data-tab="t3">Assessment</button>
+          </div>
+          <div class="panel fields" id="t1" role="tabpanel">
+            <div class="field wide"><label for="f-name">Full name</label><input id="f-name" autocomplete="off" aria-describedby="e-name"><p class="err" id="e-name"></p></div>
+            <div class="field"><label for="f-age">Age</label><input id="f-age" inputmode="numeric" aria-describedby="e-age"><p class="err" id="e-age"></p></div>
+            <div class="field"><label for="f-gender">Gender</label><select id="f-gender"><option>Female</option><option>Male</option></select></div>
+            <div class="field"><label for="f-phone">Phone</label><input id="f-phone" inputmode="tel" placeholder="Format: 03 123 456" aria-describedby="e-phone"><p class="err" id="e-phone"></p></div>
+            <div class="field"><label for="f-time">Appointment today</label><input id="f-time" type="time" value="15:30"></div>
+          </div>
+          <div class="panel fields" id="t2" role="tabpanel" hidden>
+            <div class="field"><label for="f-allergy">Allergies</label><input id="f-allergy" placeholder="Leave empty if none"></div>
+            <div class="field"><label for="f-blood">Blood group</label><select id="f-blood"><option>Unknown</option><option>O+</option><option>O−</option><option>A+</option><option>A−</option><option>B+</option><option>B−</option><option>AB+</option><option>AB−</option></select></div>
+            <div class="field wide"><label for="f-history">Medical history</label><textarea id="f-history" placeholder="Conditions, surgeries, medicines"></textarea></div>
+          </div>
+          <div class="panel fields" id="t3" role="tabpanel" hidden>
+            <div class="field wide"><label for="f-reason">Reason for the visit</label><input id="f-reason" aria-describedby="e-reason"><p class="err" id="e-reason"></p></div>
+            <div class="field wide"><span style="font-weight:700">Priority</span><div class="seg" role="radiogroup" aria-label="Priority"><label><input type="radio" name="prio" value="routine" checked>Routine</label><label class="is-urgent"><input type="radio" name="prio" value="urgent">Urgent</label></div></div>
+          </div>
+          <div class="form-foot"><button class="btn" type="button" id="nextTab">Next section</button><button class="btn btn--pine" type="submit">Save patient</button></div>
+        </form>
+      </section>
+
+      <!-- Day summary -->
+      <section class="view" id="v-summary" hidden>
+        <div class="sum-head"><p class="muted-p" id="sumDate"></p><button class="btn btn--pine" type="button" id="printBtn">Print summary</button></div>
+        <div class="counts sum-counts" id="sumCounts"></div>
+        <div class="split sum-split">
+          <div class="panel"><div class="panel-head"><div><h2>Completed visits</h2><p>With the notes and prescriptions written today.</p></div></div><ul class="sum-list" id="sumDone"></ul></div>
+          <div class="panel"><div class="panel-head"><div><h2>Still to come</h2><p>Booked today and not seen yet.</p></div></div><ul class="sum-list" id="sumLeft"></ul></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<dialog class="dlg" id="bookDlg" aria-labelledby="bookTitle">
+  <form id="bookForm" novalidate>
+    <h2 id="bookTitle">Book an appointment</h2>
+    <p class="muted-p">For a returning patient. Someone new? <button class="link" type="button" id="toNew">Register them first</button>.</p>
+    <div class="field"><label for="b-patient">Patient</label><select id="b-patient"></select></div>
+    <div class="field"><label for="b-slot">Time today</label><select id="b-slot"></select><p class="hint-p" id="slotHint"></p></div>
+    <div class="field"><label for="b-reason">Reason for the visit</label><input id="b-reason" aria-describedby="e-breason"><p class="err" id="e-breason"></p></div>
+    <div class="dlg-foot"><button class="btn" type="button" id="bookCancel">Cancel</button><button class="btn btn--pine" type="submit">Book appointment</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s)
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)]
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+
+  // ---------- Today’s list, kept between visits ----------
+  const SEED = [
+    { id: 1, name: 'Sarah Johnson', age: 34, gender: 'Female', phone: '03 214 870', time: '09:00', status: 'done', urgent: false, arrivedMin: 100, startedMin: 92, doneMin: 78, notes: 'Blood pressure well controlled on amlodipine. Review in three months.', rx: [['Amlodipine', '5 mg', 'Once daily']], reason: 'Follow-up, blood pressure', allergy: '', blood: 'A+', history: ['Hypertension, controlled'], vitals: { bp: '128/82', hr: 72, temp: 36.7, spo2: 98 } },
+    { id: 2, name: 'Michael Chen', age: 61, gender: 'Male', phone: '70 556 112', time: '09:30', status: 'in', urgent: false, arrivedMin: 40, startedMin: 12, reason: 'Diabetes review', allergy: 'Penicillin', blood: 'O+', history: ['Type 2 diabetes', 'Knee surgery, 2019'], vitals: { bp: '138/88', hr: 80, temp: 36.9, spo2: 97 } },
+    { id: 3, name: 'Emily Rodriguez', age: 47, gender: 'Female', phone: '76 301 994', time: '10:00', status: 'waiting', urgent: true, arrivedMin: 34, reason: 'Chest pain since this morning', allergy: '', blood: 'B+', history: ['Asthma'], vitals: { bp: '152/96', hr: 108, temp: 37.2, spo2: 94 } },
+    { id: 4, name: 'Omar Haddad', age: 29, gender: 'Male', phone: '03 778 450', time: '10:30', status: 'waiting', urgent: false, arrivedMin: 7, reason: 'Persistent cough', allergy: '', blood: 'A−', history: [], vitals: { bp: '118/76', hr: 76, temp: 37.8, spo2: 97 } },
+    { id: 5, name: 'Nour Saleh', age: 8, gender: 'Female', phone: '71 208 663', time: '11:00', status: 'scheduled', urgent: false, reason: 'Ear pain', allergy: 'Peanuts', blood: 'O−', history: ['Seasonal allergies'], vitals: null },
+    { id: 6, name: 'George Mansour', age: 73, gender: 'Male', phone: '03 990 127', time: '11:30', status: 'scheduled', urgent: false, reason: 'Medication renewal', allergy: '', blood: 'AB+', history: ['Atrial fibrillation', 'Hip replacement, 2021'], vitals: { bp: '134/80', hr: 88, temp: 36.6, spo2: 96 } },
+    { id: 7, name: 'Lina Farah', age: 38, gender: 'Female', phone: '76 445 802', time: '12:00', status: 'scheduled', urgent: false, reason: 'Headaches', allergy: '', blood: 'A+', history: ['Migraine'], vitals: null },
+  ]
+  // returning patients who are not booked today (for "Book appointment")
+  const DIRECTORY = [
+    { name: 'Rana Khoury', age: 44, gender: 'Female', phone: '03 552 901', allergy: '', blood: 'B+', history: ['Hypothyroidism'] },
+    { name: 'Hadi Nasr', age: 57, gender: 'Male', phone: '70 118 274', allergy: 'Aspirin', blood: 'O+', history: ['Gout'] },
+    { name: 'Maya Daher', age: 26, gender: 'Female', phone: '76 663 418', allergy: '', blood: 'A−', history: [] },
+    { name: 'Tarek Aoun', age: 68, gender: 'Male', phone: '03 207 559', allergy: '', blood: 'AB−', history: ['Hypertension', 'Cataract surgery, 2022'] },
+  ]
+  // past visits: d = days ago, bp, hr, rx = [medicine, dose, how often], labs = [test, value, unit, flag]
+  const HISTORY = {"Sarah Johnson":[{"d":300,"reason":"High blood pressure found at a work check","dx":"Stage 1 hypertension","notes":"Three high readings at work. No headaches or chest pain. Agreed to cut salt and keep a home blood pressure log.","bp":"148/94","hr":78,"rx":[["Amlodipine","5 mg","Once daily"]],"labs":[["Cholesterol, total","5.1","mmol/L",""],["Creatinine","68","µmol/L",""]],"next":"Review in 3 months"},{"d":210,"reason":"Blood pressure follow-up","dx":"Hypertension, improving","notes":"Home log averages 140/88. Mild ankle swelling, tolerable. Continue the same dose.","bp":"138/88","hr":74,"rx":[["Amlodipine","5 mg","Once daily"]],"labs":[],"next":"Review in 3 months"},{"d":120,"reason":"Blood pressure follow-up","dx":"Hypertension, controlled","notes":"Ankle swelling has settled. Walking 30 minutes most days.","bp":"132/84","hr":72,"rx":[["Amlodipine","5 mg","Once daily"]],"labs":[["Cholesterol, total","4.7","mmol/L",""]],"next":"Review in 3 months"}],"Michael Chen":[{"d":365,"reason":"Tired and thirsty for a month","dx":"Type 2 diabetes, poorly controlled","notes":"HbA1c well above target. Diet advice given and metformin started.","bp":"146/90","hr":84,"rx":[["Metformin","500 mg","Twice daily"]],"labs":[["HbA1c","8.4","%","high"],["LDL cholesterol","3.9","mmol/L","high"]],"next":"Review in 3 months"},{"d":270,"reason":"Diabetes review","dx":"Type 2 diabetes","notes":"Tolerating metformin. Sugar readings still high in the mornings, so the dose goes up.","bp":"142/88","hr":82,"rx":[["Metformin","1000 mg","Twice daily"]],"labs":[["HbA1c","7.9","%","high"]],"next":"Review in 3 months"},{"d":180,"reason":"Diabetes review","dx":"Type 2 diabetes, raised cholesterol","notes":"Lost 3 kg. Cholesterol still high, so a statin is added.","bp":"140/86","hr":80,"rx":[["Metformin","1000 mg","Twice daily"],["Atorvastatin","20 mg","Once daily"]],"labs":[["HbA1c","7.5","%","high"],["LDL cholesterol","3.4","mmol/L","high"]],"next":"Review in 3 months"},{"d":90,"reason":"Diabetes review and foot check","dx":"Type 2 diabetes, improving","notes":"Foot check normal. Eye screening booked. Keep going with walking and diet.","bp":"136/86","hr":78,"rx":[["Metformin","1000 mg","Twice daily"],["Atorvastatin","20 mg","Once daily"]],"labs":[["HbA1c","7.2","%","high"],["LDL cholesterol","2.6","mmol/L",""]],"next":"Review in 3 months"}],"Emily Rodriguez":[{"d":400,"reason":"Asthma review","dx":"Asthma, mild and persistent","notes":"Using the reliever four times a week. Preventer inhaler started, inhaler technique checked.","bp":"124/80","hr":76,"rx":[["Budesonide inhaler","200 mcg","Twice daily"],["Salbutamol inhaler","100 mcg","When needed"]],"labs":[],"next":"Review in 6 months"},{"d":150,"reason":"Wheezing after a cold","dx":"Asthma flare after a viral infection","notes":"Peak flow 70% of best. Short course of steroid tablets.","bp":"128/82","hr":92,"rx":[["Prednisolone","40 mg","Once daily, 5 days"],["Budesonide inhaler","200 mcg","Twice daily"],["Salbutamol inhaler","100 mcg","When needed"]],"labs":[],"next":"Call if not better in 48 hours"}],"Omar Haddad":[{"d":500,"reason":"Twisted ankle playing football","dx":"Ankle sprain","notes":"No bone tenderness. Rest, ice and elevation for a week.","bp":"120/78","hr":70,"rx":[["Ibuprofen","400 mg","Three times daily, 5 days"]],"labs":[],"next":""}],"Nour Saleh":[{"d":240,"reason":"Sneezing and itchy eyes every spring","dx":"Seasonal allergies (hay fever)","notes":"Seen with her mother. Peanut allergy noted. Antihistamine for the season.","bp":"100/64","hr":92,"rx":[["Cetirizine syrup","5 mg","Once daily"]],"labs":[],"next":"Return if symptoms continue past June"},{"d":60,"reason":"School check-up","dx":"Healthy child","notes":"Growth on track. Vaccinations up to date. Allergy action plan reviewed with her mother.","bp":"102/66","hr":90,"rx":[],"labs":[],"next":""}],"George Mansour":[{"d":330,"reason":"Fast, irregular heartbeat","dx":"Atrial fibrillation","notes":"New atrial fibrillation on ECG. Blood thinner and rate control started. Referred to cardiology.","bp":"142/84","hr":104,"rx":[["Apixaban","5 mg","Twice daily"],["Bisoprolol","2.5 mg","Once daily"]],"labs":[["Creatinine","96","µmol/L",""],["Haemoglobin","13.8","g/dL",""]],"next":"Review in 6 weeks"},{"d":240,"reason":"Heart rhythm follow-up","dx":"Atrial fibrillation, rate still fast","notes":"Pulse still around 90. Bisoprolol increased.","bp":"138/82","hr":92,"rx":[["Apixaban","5 mg","Twice daily"],["Bisoprolol","5 mg","Once daily"]],"labs":[],"next":"Review in 3 months"},{"d":150,"reason":"Heart rhythm follow-up","dx":"Atrial fibrillation, rate controlled","notes":"Feeling well, no dizziness. Cardiology letter received: continue the same plan.","bp":"136/80","hr":84,"rx":[["Apixaban","5 mg","Twice daily"],["Bisoprolol","5 mg","Once daily"]],"labs":[["Creatinine","101","µmol/L",""]],"next":"Review in 3 months"},{"d":60,"reason":"Repeat prescription and kidney check","dx":"Atrial fibrillation, stable","notes":"Kidney function stable, so the apixaban dose stays the same.","bp":"134/80","hr":88,"rx":[["Apixaban","5 mg","Twice daily"],["Bisoprolol","5 mg","Once daily"]],"labs":[["Creatinine","99","µmol/L",""],["Haemoglobin","13.5","g/dL",""]],"next":"Review in 3 months"}],"Lina Farah":[{"d":200,"reason":"Headaches about four times a month","dx":"Migraine without aura","notes":"Normal neurological exam. Headache diary started. Preventer and a rescue tablet.","bp":"122/78","hr":74,"rx":[["Propranolol","40 mg","Twice daily"],["Sumatriptan","50 mg","When needed"]],"labs":[],"next":"Review in 3 months"},{"d":100,"reason":"Migraine review","dx":"Migraine, improving","notes":"Down to one migraine a month. Sleeping better.","bp":"118/74","hr":66,"rx":[["Propranolol","40 mg","Twice daily"],["Sumatriptan","50 mg","When needed"]],"labs":[],"next":"Review in 3 months"}],"Rana Khoury":[{"d":420,"reason":"Tired, cold and gaining weight","dx":"Underactive thyroid","notes":"Thyroid blood test raised. Levothyroxine started.","bp":"126/80","hr":62,"rx":[["Levothyroxine","50 mcg","Once daily"]],"labs":[["TSH","6.8","mU/L","high"]],"next":"Blood test in 8 weeks"},{"d":340,"reason":"Thyroid follow-up","dx":"Underactive thyroid","notes":"Some energy back. Still slightly under-replaced, so the dose goes up.","bp":"124/78","hr":66,"rx":[["Levothyroxine","75 mcg","Once daily"]],"labs":[["TSH","4.6","mU/L","high"]],"next":"Blood test in 8 weeks"},{"d":150,"reason":"Thyroid follow-up","dx":"Underactive thyroid, controlled","notes":"Feeling back to normal. Yearly blood test from now on.","bp":"120/76","hr":70,"rx":[["Levothyroxine","75 mcg","Once daily"]],"labs":[["TSH","2.2","mU/L",""]],"next":"Yearly blood test"}],"Hadi Nasr":[{"d":260,"reason":"Painful, swollen big toe","dx":"Acute gout","notes":"Classic gout attack. Aspirin allergy noted. Short anti-inflammatory course, then uric acid lowering once settled.","bp":"144/90","hr":86,"rx":[["Colchicine","0.5 mg","Twice daily, 7 days"]],"labs":[["Uric acid","540","µmol/L","high"]],"next":"Review in 4 weeks"},{"d":220,"reason":"Gout follow-up","dx":"Gout, settled","notes":"No pain now. Allopurinol started. Fewer sugary drinks and less red meat.","bp":"138/86","hr":78,"rx":[["Allopurinol","100 mg","Once daily"]],"labs":[["Uric acid","470","µmol/L","high"]],"next":"Blood test in 6 weeks"},{"d":130,"reason":"Gout follow-up","dx":"Gout, controlled","notes":"No attacks since starting allopurinol. Dose raised to reach the target level.","bp":"134/84","hr":76,"rx":[["Allopurinol","200 mg","Once daily"]],"labs":[["Uric acid","340","µmol/L",""]],"next":"Review in 6 months"}],"Maya Daher":[{"d":330,"reason":"Yearly check-up","dx":"Healthy adult","notes":"No concerns. Blood tests normal. Advised to keep up exercise.","bp":"112/72","hr":64,"rx":[],"labs":[["Haemoglobin","13.1","g/dL",""],["Vitamin D","48","nmol/L",""]],"next":"Yearly check-up"}],"Tarek Aoun":[{"d":380,"reason":"Headaches and high home readings","dx":"Stage 2 hypertension","notes":"Readings around 160/95 at home. ECG normal. Losartan started.","bp":"158/92","hr":80,"rx":[["Losartan","50 mg","Once daily"]],"labs":[["Creatinine","88","µmol/L",""],["Potassium","4.3","mmol/L",""]],"next":"Review in 4 weeks"},{"d":320,"reason":"Blood pressure follow-up","dx":"Hypertension, not yet at target","notes":"Better but still above target, so amlodipine is added.","bp":"146/86","hr":76,"rx":[["Losartan","50 mg","Once daily"],["Amlodipine","5 mg","Once daily"]],"labs":[["Potassium","4.6","mmol/L",""]],"next":"Review in 3 months"},{"d":200,"reason":"Check after cataract surgery","dx":"Hypertension, controlled","notes":"Eye healing well. Blood pressure at target on both medicines.","bp":"138/82","hr":72,"rx":[["Losartan","50 mg","Once daily"],["Amlodipine","5 mg","Once daily"]],"labs":[],"next":"Review in 6 months"}]}
+  const ago = (m) => (m == null ? null : Date.now() - m * 6e4)
+  const fresh = () => structuredClone(SEED).map(({ arrivedMin, startedMin, doneMin, ...p }) => ({ notes: '', rx: [], ...p, arrivedAt: ago(arrivedMin), startedAt: ago(startedMin), doneAt: ago(doneMin) }))
+  const KEY = 'myclinic:v2'
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) } catch { return null } }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(patients)) } catch {} }
+  let patients = load() || fresh()
+  let selected = patients.find((p) => p.urgent)?.id ?? patients[0].id
+  let filter = 'all', query = ''
+
+  const mins = (t) => Math.max(0, Math.round((Date.now() - t) / 6e4))
+  const waitHtml = (p) => p.status === 'waiting' && p.arrivedAt ? `<small class="wait${mins(p.arrivedAt) >= 30 ? ' long' : ''}" data-wait="${p.id}">Waiting ${mins(p.arrivedAt)} min</small>` : ''
+  const STATUS = { scheduled: ['Scheduled', 'st-scheduled'], waiting: ['Waiting', 'st-waiting'], in: ['In consultation', 'st-in'], done: ['Done', 'st-done'] }
+  const tag = (p) => `<span class="status ${STATUS[p.status][1]}">${STATUS[p.status][0]}</span>${p.urgent && p.status !== 'done' ? ' <span class="status flag">Urgent</span>' : ''}`
+
+  // ---------- Navigation ----------
+  const app = $('#app')
+  function go(view) {
+    $$('.view').forEach((v) => v.hidden = v.id !== 'v-' + view)
+    const navView = view === 'file' ? 'patients' : view
+    $$('.nav-btn').forEach((b) => b.dataset.nav === navView ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'))
+    $('#title').textContent = { today: 'Today', patients: 'Patients', new: 'New patient', summary: 'Day summary', file: 'Patient file' }[view]
+    setNav(false); render()
+    if (view === 'new') $('#f-name').focus()
+    if (view === 'file') scrollTo(0, 0)
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-nav]'); if (b) go(b.dataset.nav) })
+  const setNav = (o) => { app.classList.toggle('nav-open', o); $('#menuBtn').setAttribute('aria-expanded', String(o)) }
+  $('#menuBtn').addEventListener('click', () => setNav(!app.classList.contains('nav-open')))
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') setNav(false) })
+  $('#date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  // ---------- Today ----------
+  const visible = () => {
+    const q = query.trim().toLowerCase()
+    return patients
+      .filter((p) => filter === 'all' || (filter === 'urgent' ? p.urgent && p.status !== 'done' : p.status === filter))
+      .filter((p) => !q || p.name.toLowerCase().includes(q) || p.reason.toLowerCase().includes(q))
+      .sort((a, b) => (b.urgent && b.status !== 'done') - (a.urgent && a.status !== 'done') || (a.status === 'done') - (b.status === 'done') || a.time.localeCompare(b.time))
+  }
+  function renderCounts() {
+    const urgent = patients.filter((p) => p.urgent && p.status !== 'done').length
+    const items = [['all', patients.length, 'Patients today', ''], ['waiting', patients.filter((p) => p.status === 'waiting').length, 'Waiting', 'is-wait'], ['urgent', urgent, 'Urgent', 'is-urgent'], ['done', patients.filter((p) => p.status === 'done').length, 'Completed', '']]
+    $('#counts').innerHTML = items.map(([k, n, l, c]) => `<button type="button" class="${c}" data-filter="${k}" aria-pressed="${filter === k}"><strong>${n}</strong><span>${l}</span></button>`).join('')
+    const badge = $('#urgentBadge'); badge.textContent = urgent; badge.hidden = !urgent
+  }
+  $('#counts').addEventListener('click', (e) => { const b = e.target.closest('[data-filter]'); if (!b) return; filter = filter === b.dataset.filter && filter !== 'all' ? 'all' : b.dataset.filter; render() })
+  function renderQueue() {
+    const list = visible()
+    $('#queueNote').textContent = filter === 'all' ? 'In time order. Urgent patients come first.' : `Showing ${({ waiting: 'patients waiting', urgent: 'urgent patients', done: 'completed visits' })[filter]}. Select the count again to show everyone.`
+    $('#queue').innerHTML = list.length ? list.map((p) => `<li><button type="button" class="appt${p.urgent && p.status !== 'done' ? ' is-urgent' : ''}" data-id="${p.id}" aria-current="${p.id === selected}"><time>${p.time}</time><span><strong>${esc(p.name)}</strong><small>${esc(p.reason)}</small>${waitHtml(p)}</span><span>${tag(p)}</span></button></li>`).join('')
+      : `<li class="empty">${query ? `No patient matches "${esc(query)}".` : 'Nobody in this group right now.'}</li>`
+  }
+  $('#queue').addEventListener('click', (e) => { const b = e.target.closest('[data-id]'); if (!b) return; selected = +b.dataset.id; render(); if (innerWidth < 1100) $('#detail').scrollIntoView({ behavior: 'smooth', block: 'start' }) })
+
+  function renderDetail() {
+    const p = patients.find((x) => x.id === selected)
+    if (!p) { $('#detail').innerHTML = '<p class="empty">Select a patient to see their record.</p>'; return }
+    const v = p.vitals, sys = v ? +v.bp.split('/')[0] : 0
+    const next = { scheduled: ['waiting', 'Mark arrived'], waiting: ['in', 'Start consultation'], in: ['done', 'Complete visit'], done: null }[p.status]
+    $('#detail').innerHTML = `
+      <div class="who"><div class="who-top"><div><h2>${esc(p.name)}</h2><p>${p.age} years, ${p.gender.toLowerCase()}, blood group ${p.blood}. Appointment ${p.time}.</p><p class="seen">${seenLine(p.name)}</p></div><div>${tag(p)}</div></div>
+        <p><strong>Reason:</strong> ${esc(p.reason)}</p>${p.allergy ? `<p class="allergy">Allergy: ${esc(p.allergy)}</p>` : ''}</div>
+      <div class="acts">
+        ${next ? `<button class="btn btn--pine" type="button" data-step="${next[0]}">${next[1]}</button>` : '<span class="status st-done">Visit completed</span>'}
+        <button class="btn" type="button" data-file="${esc(p.name)}">Patient file</button>
+        <button class="btn btn--urgent" type="button" id="urgentBtn" aria-pressed="${p.urgent}" ${p.status === 'done' ? 'disabled' : ''}>${p.urgent ? 'Urgent, flagged' : 'Flag as urgent'}</button>
+      </div>
+      <div class="vitals" aria-label="Latest vital signs">
+        <div><span>Blood pressure</span><strong class="${sys >= 140 ? 'high' : ''}">${v ? v.bp : '—'}</strong></div>
+        <div><span>Heart rate</span><strong class="${v && v.hr > 100 ? 'high' : ''}">${v ? v.hr : '—'}</strong></div>
+        <div><span>Temperature</span><strong class="${v && v.temp >= 37.5 ? 'high' : ''}">${v ? v.temp + '°' : '—'}</strong></div>
+        <div><span>Oxygen</span><strong class="${v && v.spo2 < 95 ? 'high' : ''}">${v ? v.spo2 + '%' : '—'}</strong></div>
+      </div>
+      <div class="block"><h3>Record vitals</h3>
+        <form class="vital-form" id="vitalForm" novalidate>
+          <label>BP<input name="bp" placeholder="120/80" value="${v ? v.bp : ''}"></label>
+          <label>Pulse<input name="hr" inputmode="numeric" value="${v ? v.hr : ''}"></label>
+          <label>Temp °C<input name="temp" inputmode="decimal" value="${v ? v.temp : ''}"></label>
+          <label>SpO₂ %<input name="spo2" inputmode="numeric" value="${v ? v.spo2 : ''}"></label>
+          <button class="btn" type="submit">Save vitals</button>
+        </form><p class="err" id="vitalErr" style="color:var(--urgent);font-size:.88rem;margin-top:6px"></p></div>
+      <div class="block"><h3>Visit notes</h3>
+        <label class="sr-only" for="notes">Visit notes</label><textarea class="notes" id="notes" placeholder="Findings, diagnosis and advice">${esc(p.notes || '')}</textarea>
+        <h3 style="margin-top:14px">Prescription</h3>
+        <ul class="rx" id="rxList">${(p.rx || []).map(([d, s, fq], i) => `<li><span><strong>${esc(d)}</strong> ${esc(s)}, ${esc(fq.toLowerCase())}</span><button type="button" data-rxrm="${i}">Remove</button></li>`).join('') || '<li style="background:none;padding:0;color:var(--muted)">No medicines yet.</li>'}</ul>
+        <form class="rx-form" id="rxForm" novalidate><label class="sr-only" for="rxDrug">Medicine</label><input id="rxDrug" placeholder="Medicine"><label class="sr-only" for="rxDose">Dose</label><input id="rxDose" placeholder="Dose, e.g. 500 mg"><label class="sr-only" for="rxFreq">How often</label><select id="rxFreq"><option>Once daily</option><option>Twice daily</option><option>Three times daily</option><option>When needed</option></select><button class="btn" type="submit">Add medicine</button></form>
+        <p class="err" id="rxErr" style="color:var(--urgent);font-size:.85rem;margin-top:6px"></p>
+        <div class="row-acts"><button class="btn btn--pine" type="button" id="saveNotes">Save notes</button><span class="saved" id="savedMsg" hidden>Saved</span></div></div>
+      <div class="block"><h3>Medical history</h3>${p.history.length ? `<ul>${p.history.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>` : '<p class="muted" style="color:var(--muted)">Nothing recorded.</p>'}</div>
+      <div class="block"><h3>Contact</h3><p>${esc(p.phone)}</p></div>`
+    $('[data-step]', $('#detail'))?.addEventListener('click', (e) => { p.status = e.target.dataset.step; const now = Date.now(); if (p.status === 'waiting') p.arrivedAt = now; if (p.status === 'in') p.startedAt = now; if (p.status === 'done') p.doneAt = now; save(); render(); toast(`${p.name.split(' ')[0]}: ${STATUS[p.status][0].toLowerCase()}.`) })
+    $('#saveNotes').addEventListener('click', () => { p.notes = $('#notes').value.trim(); save(); const m = $('#savedMsg'); m.hidden = false; setTimeout(() => (m.hidden = true), 2000); toast(`Notes saved for ${p.name}.`) })
+    $('#notes').addEventListener('blur', () => { p.notes = $('#notes').value.trim(); save() })
+    $('#rxForm').addEventListener('submit', (e) => {
+      e.preventDefault(); const d = $('#rxDrug').value.trim(), s = $('#rxDose').value.trim(), err = $('#rxErr')
+      if (d.length < 2) { err.textContent = 'Write the name of the medicine.'; $('#rxDrug').focus(); return }
+      if (!s) { err.textContent = 'Write the dose, for example 500 mg.'; $('#rxDose').focus(); return }
+      p.notes = $('#notes').value.trim(); p.rx = [...(p.rx || []), [d, s, $('#rxFreq').value]]; save(); render(); toast(`${d} added to ${p.name.split(' ')[0]}'s prescription.`)
+    })
+    $$('[data-rxrm]', $('#detail')).forEach((b) => b.addEventListener('click', () => { p.notes = $('#notes').value.trim(); p.rx.splice(+b.dataset.rxrm, 1); save(); render() }))
+    $('#urgentBtn').addEventListener('click', () => { p.urgent = !p.urgent; save(); render(); toast(p.urgent ? `${p.name} is flagged urgent and moved to the top.` : `${p.name} is no longer urgent.`) })
+    $('#vitalForm').addEventListener('submit', (e) => {
+      e.preventDefault(); const f = new FormData(e.target), err = $('#vitalErr')
+      const bp = f.get('bp').trim(), hr = +f.get('hr'), temp = +f.get('temp'), spo2 = +f.get('spo2')
+      if (!/^\d{2,3}\/\d{2,3}$/.test(bp)) return err.textContent = 'Write blood pressure as two numbers, for example 120/80.'
+      if (!(hr > 20 && hr < 250) || !(temp > 30 && temp < 45) || !(spo2 > 50 && spo2 <= 100)) return err.textContent = 'Check pulse, temperature and oxygen: one of them is out of range.'
+      p.vitals = { bp, hr, temp, spo2 }; save(); render(); toast(`Vitals saved for ${p.name}.`)
+    })
+  }
+
+  // ---------- Patients ----------
+  function renderPatients() {
+    const q = query.trim().toLowerCase(), list = everyone().filter((p) => !q || p.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name))
+    $('#patCount').textContent = `${list.length} ${list.length === 1 ? 'patient' : 'patients'}`
+    $('#patients').innerHTML = list.length ? list.map((p) => `<tr data-open="${esc(p.name)}" tabindex="0"><td><strong>${esc(p.name)}</strong>${p.urgent && p.status !== 'done' ? ' <span class="status flag">Urgent</span>' : ''}</td><td class="hide-sm">${p.age}</td><td class="hide-sm">${visitsOf(p.name).length}</td><td class="hide-sm">${lastSeen(p.name)}</td><td>${p.status ? `${p.time} <span class="status ${STATUS[p.status][1]}">${STATUS[p.status][0]}</span>` : '<span class="muted-p">Not booked</span>'}</td></tr>`).join('') : `<tr><td colspan="5" class="empty">No patient matches "${esc(query)}".</td></tr>`
+  }
+  const openRow = (r) => openFile(r.dataset.open)
+  $('#patients').addEventListener('click', (e) => { const r = e.target.closest('[data-open]'); if (r) openRow(r) })
+  $('#patients').addEventListener('keydown', (e) => { const r = e.target.closest('[data-open]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openRow(r) } })
+  $('#q').addEventListener('input', (e) => { query = e.target.value; render() })
+
+  // ---------- New patient ----------
+  const tabs = ['t1', 't2', 't3']
+  const showTab = (id) => { $$('.tabs [role="tab"]').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === id))); tabs.forEach((t) => $('#' + t).hidden = t !== id); $('#nextTab').hidden = id === 't3' }
+  $$('.tabs [role="tab"]').forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)))
+  $('#nextTab').addEventListener('click', () => { const cur = tabs.find((t) => !$('#' + t).hidden); showTab(tabs[Math.min(2, tabs.indexOf(cur) + 1)]) })
+  const rules = {
+    'f-name': [(v) => v.trim().split(/\s+/).length >= 2, 'Enter the first and last name.'],
+    'f-age': [(v) => /^\d{1,3}$/.test(v.trim()) && +v <= 120, 'Enter the age in years, from 0 to 120.'],
+    'f-phone': [(v) => v.replace(/\D/g, '').length >= 7, 'Enter a phone number of at least 7 digits.'],
+    'f-reason': [(v) => v.trim().length >= 3, 'Write why the patient is coming in.'],
+  }
+  const check = (id) => { const el = $('#' + id), [ok, msg] = rules[id], good = ok(el.value); el.toggleAttribute('aria-invalid', !good); $('#e-' + id.slice(2)).textContent = good ? '' : msg; return good }
+  Object.keys(rules).forEach((id) => { $('#' + id).addEventListener('blur', () => { if ($('#' + id).value) check(id) }); $('#' + id).addEventListener('input', () => { if ($('#' + id).hasAttribute('aria-invalid')) check(id) }) })
+  $('#newForm').addEventListener('submit', (e) => {
+    e.preventDefault()
+    const bad = Object.keys(rules).filter((id) => !check(id))
+    if (bad.length) { const tab = $('#' + bad[0]).closest('[role="tabpanel"]').id; showTab(tab); $('#' + bad[0]).focus(); return }
+    const p = { id: Date.now(), name: $('#f-name').value.trim(), age: +$('#f-age').value, gender: $('#f-gender').value, phone: $('#f-phone').value.trim(), time: $('#f-time').value || '15:30',
+      status: 'scheduled', urgent: $('input[name="prio"]:checked').value === 'urgent', reason: $('#f-reason').value.trim(), allergy: $('#f-allergy').value.trim(), blood: $('#f-blood').value,
+      history: $('#f-history').value.split(/[\n,]/).map((s) => s.trim()).filter(Boolean), vitals: null }
+    patients.push(p); save(); e.target.reset(); showTab('t1'); selected = p.id; filter = 'all'; go('today')
+    toast(`${p.name} is saved and on today's list${p.urgent ? ', flagged urgent' : ''}.`)
+  })
+
+  // ---------- Toast, reset, render ----------
+  let tt
+  function toast(msg) { const t = $('#toast'); t.innerHTML = esc(msg); t.classList.add('is-on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('is-on'), 3200) }
+  $('#reset').addEventListener('click', () => { patients = fresh(); selected = 3; filter = 'all'; query = ''; $('#q').value = ''; save(); go('today'); toast('Today’s list is back to this morning.') })
+  // refresh only the wait labels every 30 seconds, so nothing being typed is disturbed
+  setInterval(() => $$('[data-wait]').forEach((el) => { const p = patients.find((x) => x.id === +el.dataset.wait); if (!p || !p.arrivedAt) return; const m = mins(p.arrivedAt); el.textContent = 'Waiting ' + m + ' min'; el.classList.toggle('long', m >= 30) }), 30000)
+  // ---------- Book an appointment ----------
+  const bookDlg = $('#bookDlg')
+  const SLOTS = Array.from({ length: 18 }, (_, i) => { const m = 9 * 60 + i * 30; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + (m % 60 ? '30' : '00') })
+  function openBook(name) {
+    const taken = new Set(patients.map((p) => p.time)), free = SLOTS.filter((s) => !taken.has(s))
+    const people = DIRECTORY.filter((d) => !patients.some((p) => p.name === d.name))
+    $('#b-patient').innerHTML = people.length ? people.map((d, i) => `<option value="${i}">${d.name}, ${d.age}</option>`).join('') : '<option value="">Everyone in the directory is booked today</option>'
+    $('#b-slot').innerHTML = free.map((s) => `<option>${s}</option>`).join('')
+    $('#slotHint').textContent = `${free.length} free ${free.length === 1 ? 'slot' : 'slots'} today. Taken times are not listed.`
+    $('#b-reason').value = ''; $('#b-reason').removeAttribute('aria-invalid'); $('#e-breason').textContent = ''
+    const pre = people.findIndex((d) => d.name === name); if (pre >= 0) $('#b-patient').value = String(pre)
+    bookDlg.showModal(); $('#b-patient').focus()
+  }
+  $('#bookBtn').addEventListener('click', () => openBook())
+  $('#bookCancel').addEventListener('click', () => bookDlg.close())
+  $('#toNew').addEventListener('click', () => { bookDlg.close(); go('new') })
+  bookDlg.addEventListener('click', (e) => { if (e.target === bookDlg) bookDlg.close() })
+  $('#bookForm').addEventListener('submit', (e) => {
+    e.preventDefault()
+    const people = DIRECTORY.filter((d) => !patients.some((p) => p.name === d.name)), who = people[+$('#b-patient').value]
+    const reason = $('#b-reason').value.trim()
+    if (!who) return
+    if (reason.length < 3) { $('#b-reason').setAttribute('aria-invalid', 'true'); $('#e-breason').textContent = 'Write why the patient is coming in.'; $('#b-reason').focus(); return }
+    const p = { id: Date.now(), ...structuredClone(who), time: $('#b-slot').value, status: 'scheduled', urgent: false, reason, vitals: null, notes: '', rx: [], arrivedAt: null, startedAt: null, doneAt: null }
+    patients.push(p); save(); bookDlg.close(); selected = p.id; filter = 'all'; go('today'); toast(`${p.name} is booked at ${p.time}.`)
+  })
+
+  // ---------- Day summary ----------
+  function renderSummary() {
+    const done = patients.filter((p) => p.status === 'done').sort((a, b) => a.time.localeCompare(b.time))
+    const left = patients.filter((p) => p.status === 'scheduled' || p.status === 'waiting').sort((a, b) => a.time.localeCompare(b.time))
+    const waits = patients.filter((p) => p.arrivedAt && p.startedAt).map((p) => (p.startedAt - p.arrivedAt) / 6e4)
+    const avg = waits.length ? Math.round(waits.reduce((s, w) => s + w, 0) / waits.length) : 0
+    const urgentSeen = patients.filter((p) => p.urgent && p.status === 'done').length
+    $('#sumDate').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ', Dr. Ramzi K.'
+    $('#sumCounts').innerHTML = [[done.length, 'Patients seen', ''], [avg + ' min', 'Average wait', avg >= 30 ? 'is-urgent' : ''], [urgentSeen, 'Urgent cases seen', ''], [left.length, 'Still to come', 'is-wait']]
+      .map(([n, l, c]) => `<button type="button" class="${c}" tabindex="-1"><strong>${n}</strong><span>${l}</span></button>`).join('')
+    $('#sumDone').innerHTML = done.length ? done.map((p) => `<li><strong>${p.time}, ${esc(p.name)}</strong><p>${esc(p.reason)}${p.notes ? '. ' + esc(p.notes) : ''}</p>${(p.rx || []).length ? `<p class="rxs">${p.rx.map(([d, s, f]) => `${esc(d)} ${esc(s)}, ${esc(f.toLowerCase())}`).join('; ')}</p>` : ''}</li>`).join('') : '<li class="empty">No visits completed yet today.</li>'
+    $('#sumLeft').innerHTML = left.length ? left.map((p) => `<li><strong>${p.time}, ${esc(p.name)}</strong><p>${p.status === 'waiting' ? 'In the waiting room' : 'Not arrived yet'}. ${esc(p.reason)}</p></li>`).join('') : '<li class="empty">Everyone booked today has been seen.</li>'
+  }
+  $('#printBtn').addEventListener('click', () => print())
+
+  // ---------- Patient file ----------
+  const DAY = 864e5
+  const fmt = (t, o = { day: 'numeric', month: 'long', year: 'numeric' }) => new Date(t).toLocaleDateString('en-GB', o)
+  const today = (name) => patients.find((p) => p.name === name)
+  const everyone = () => [...patients, ...DIRECTORY.filter((d) => !today(d.name))]
+  // every visit, oldest first; today's counts once the patient has arrived
+  function visitsOf(name) {
+    const past = (HISTORY[name] || []).map((x) => ({ ...x, t: Date.now() - x.d * DAY }))
+    const p = today(name)
+    if (p && p.status && p.status !== 'scheduled') {
+      past.push({ t: p.startedAt || p.arrivedAt || Date.now(), today: true, status: p.status, reason: p.reason, dx: '', notes: p.notes || '', bp: p.status !== 'waiting' && p.vitals ? p.vitals.bp : '', hr: p.vitals ? p.vitals.hr : '', rx: p.rx || [], labs: [], next: '' })
+    }
+    return past
+  }
+  const lastSeen = (name) => { const past = HISTORY[name] || []; return past.length ? fmt(Date.now() - Math.min(...past.map((x) => x.d)) * DAY, { month: 'short', year: 'numeric' }) : 'New' }
+  function seenLine(name) {
+    const past = HISTORY[name] || []
+    if (!past.length) return 'First visit to the clinic.'
+    const last = Math.min(...past.map((x) => x.d)), m = Math.round(last / 30)
+    return `Seen ${past.length} ${past.length === 1 ? 'time' : 'times'} before. Last visit ${m < 1 ? 'this month' : m === 1 ? 'a month ago' : m + ' months ago'}.`
+  }
+  const rxText = ([d, s, f]) => `${esc(d)} ${esc(s)}, ${esc(f.charAt(0).toLowerCase() + f.slice(1))}`
+  let fileName = null
+
+  function openFile(name) { fileName = name; go('file') }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-file]'); if (b) openFile(b.dataset.file) })
+
+  function renderFile() {
+    const name = fileName, base = today(name) || DIRECTORY.find((d) => d.name === name)
+    if (!base) { $('#file').innerHTML = '<p class="empty">Choose a patient from the list.</p>'; return }
+    const visits = visitsOf(name), past = visits.filter((x) => !x.today), p = today(name)
+    const since = visits.length ? fmt(visits[0].t, { month: 'long', year: 'numeric' }) : 'Today'
+    const lastPast = past[past.length - 1]
+    // current medicines: the latest list written, with when each one started
+    const withRx = visits.filter((x) => x.rx.length), current = withRx.length ? withRx[withRx.length - 1].rx.filter(([, , f]) => !/days?$/.test(f)) : []
+    const startOf = (drug, dose) => { let t = null; for (let i = withRx.length - 1; i >= 0; i--) { if (withRx[i].rx.some(([d, s]) => d === drug && s === dose)) t = withRx[i].t; else break } return t }
+    // labs grouped by test, oldest first
+    const labs = {}; visits.forEach((x) => x.labs.forEach(([n, val, u, f]) => (labs[n] = labs[n] || []).push({ t: x.t, val: +val, u, f })))
+    // blood pressure readings
+    const bp = visits.filter((x) => x.bp).map((x) => ({ t: x.t, sys: +x.bp.split('/')[0], dia: +x.bp.split('/')[1], hr: x.hr, today: x.today }))
+    const notes = []
+    if (bp.length >= 2) {
+      const a = bp[0], z = bp[bp.length - 1], down = z.sys < a.sys
+      notes.push(`Blood pressure went ${down ? 'down' : 'up'} from ${a.sys}/${a.dia} to ${z.sys}/${z.dia} over ${bp.length} visits${z.sys < 140 && z.dia < 90 ? ', <span class="good">now within target</span>.' : ', <span class="bad">still above the 140/90 target</span>.'}`)
+    }
+    Object.entries(labs).filter(([, r]) => r.length >= 2).forEach(([n, r]) => {
+      const a = r[0], z = r[r.length - 1]
+      notes.push(`${esc(n)} went ${z.val < a.val ? 'down' : 'up'} from ${a.val} to ${z.val} ${esc(z.u)}${a.f && !z.f ? ', <span class="good">now in the normal range</span>.' : z.f ? ', <span class="bad">still high</span>.' : '.'}`)
+    })
+    const changes = withRx.slice(1).filter((x, i) => JSON.stringify(x.rx) !== JSON.stringify(withRx[i].rx)).length
+    if (withRx.length) notes.push(`${changes ? `Treatment changed ${changes} ${changes === 1 ? 'time' : 'times'}` : 'Treatment unchanged'} since the first prescription.`)
+    if (!notes.length) notes.push(past.length ? 'Not enough repeat readings yet to show progress.' : 'This is the first visit. Progress shows here after the next one.')
+
+    const next = p ? (p.status === 'done' ? 'Seen today' : `Today, ${p.time}`) : lastPast && lastPast.next ? lastPast.next : 'Not booked'
+    $('#file').innerHTML = `
+      <div class="panel"><div class="file-top">
+        <div><h2>${esc(base.name)}</h2><p>${base.age} years, ${base.gender.toLowerCase()}, blood group ${base.blood}. Phone ${esc(base.phone)}.</p>
+          ${base.allergy ? `<p class="allergy">Allergy: ${esc(base.allergy)}</p>` : ''}</div>
+        <div class="file-acts">${p ? `<button class="btn btn--pine" type="button" id="toVisit">Open today’s visit</button>` : `<button class="btn btn--pine" type="button" id="fileBook">Book appointment</button>`}<button class="btn" type="button" id="filePrint">Print file</button></div>
+      </div></div>
+      <div class="counts sum-counts file-stats">
+        ${[[visits.length, visits.length === 1 ? 'Visit' : 'Visits'], [since, 'Patient since'], [lastPast ? fmt(lastPast.t, { day: 'numeric', month: 'short', year: 'numeric' }) : 'None', 'Last visit before today'], [next, 'Next step']]
+          .map(([n, l]) => `<button type="button" tabindex="-1"><strong>${n}</strong><span>${l}</span></button>`).join('')}
+      </div>
+      <div class="file-grid">
+        <div class="file-col">
+          <div class="panel"><div class="panel-head"><div><h2>Progress</h2><p>From every visit on record.</p></div></div>
+            <div class="progress">${notes.map((n) => `<p>${n}</p>`).join('')}</div>
+            ${bp.length >= 2 ? `<div class="legend" aria-hidden="true"><span><i style="background:#16906F"></i>Systolic</span><span><i style="background:#8A63D2"></i>Diastolic</span><span><i style="background:repeating-linear-gradient(90deg,#9AA8A2 0 4px,transparent 4px 7px)"></i>Target, 140/90</span></div>
+            <div class="chart" id="bpChart" role="img" aria-label="Blood pressure at each visit, from ${bp[0].sys}/${bp[0].dia} to ${bp[bp.length - 1].sys}/${bp[bp.length - 1].dia}"></div>` : '<div style="height:16px"></div>'}
+          </div>
+          <div class="panel"><div class="panel-head"><div><h2>Visits</h2><p>Newest first.</p></div></div>
+            <ol class="timeline">${visits.length ? visits.slice().reverse().map((x) => `<li>
+              <div class="tl-date">${x.today ? 'Today' : fmt(x.t)}${x.today ? ' ' + tag(p) : ''}</div>
+              <strong>${esc(x.reason)}</strong>
+              ${x.dx ? `<span class="tl-dx">${esc(x.dx)}</span>` : ''}
+              ${x.notes ? `<p>${esc(x.notes)}</p>` : x.today ? '<p class="tl-meta">No notes written yet.</p>' : ''}
+              ${x.bp ? `<span class="tl-meta">Blood pressure ${x.bp}${x.hr ? `, pulse ${x.hr}` : ''}</span>` : ''}
+              ${x.rx.length ? `<div class="chips">${x.rx.map((r) => `<span class="chip">${rxText(r)}</span>`).join('')}</div>` : ''}
+              ${x.labs.length ? `<div class="chips">${x.labs.map(([n, val, u, f]) => `<span class="chip${f ? ' high' : ''}">${esc(n)} ${val} ${esc(u)}${f ? ', high' : ''}</span>`).join('')}</div>` : ''}
+              ${x.next ? `<span class="tl-meta">Plan: ${esc(x.next)}</span>` : ''}
+            </li>`).join('') : '<li class="empty">No visits yet. The first one will show here.</li>'}</ol>
+          </div>
+        </div>
+        <div class="file-col">
+          <div class="panel"><div class="panel-head"><div><h2>Current medicines</h2><p>From the latest prescription.</p></div></div>
+            <ul class="rows">${current.length ? current.map(([d, s, f]) => { const st = startOf(d, s); return `<li><strong>${esc(d)} ${esc(s)}</strong><small>${esc(f)}${st ? `. Since ${fmt(st, { month: 'long', year: 'numeric' })}` : ''}</small></li>` }).join('') : '<li class="muted-p">No regular medicines.</li>'}</ul></div>
+          <div class="panel"><div class="panel-head"><div><h2>Conditions</h2></div></div>
+            <ul class="rows">${base.history.length ? base.history.map((c) => `<li>${esc(c)}</li>`).join('') : '<li class="muted-p">None recorded.</li>'}</ul></div>
+          <div class="panel"><div class="panel-head"><div><h2>Lab results</h2><p>Latest value, with earlier ones below.</p></div></div>
+            <ul class="rows">${Object.keys(labs).length ? Object.entries(labs).map(([n, r]) => { const z = r[r.length - 1]; return `<li><div class="lab-top"><strong>${esc(n)}</strong><span>${z.val} ${esc(z.u)} <span class="status ${z.f ? 'flag' : 'st-done'}">${z.f ? 'High' : 'Normal'}</span></span></div><small>${r.map((x) => `${x.val} in ${fmt(x.t, { month: 'short', year: 'numeric' })}`).join(', ')}</small></li>` }).join('') : '<li class="muted-p">No lab results on file.</li>'}</ul></div>
+        </div>
+      </div>`
+    $('#toVisit')?.addEventListener('click', () => { selected = p.id; filter = 'all'; go('today') })
+    $('#fileBook')?.addEventListener('click', () => openBook(name))
+    $('#filePrint').addEventListener('click', () => print())
+    if (bp.length >= 2) drawBp($('#bpChart'), bp)
+  }
+
+  // blood pressure over time: one axis (mmHg), two thin lines, a dashed target, hover for the exact reading
+  function drawBp(el, pts) {
+    const W = Math.max(280, el.clientWidth - 40), H = 220, narrow = W < 480
+    const m = { l: 34, r: narrow ? 10 : 92, t: 12, b: 28 }
+    const lo = Math.floor((Math.min(...pts.map((p) => p.dia), 80) - 8) / 10) * 10, hi = Math.ceil((Math.max(...pts.map((p) => p.sys), 140) + 8) / 10) * 10
+    const t0 = pts[0].t, t1 = pts[pts.length - 1].t
+    const x = (t) => m.l + ((t - t0) / (t1 - t0 || 1)) * (W - m.l - m.r), y = (val) => m.t + ((hi - val) / (hi - lo)) * (H - m.t - m.b)
+    const line = (k) => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.t).toFixed(1)} ${y(p[k]).toFixed(1)}`).join(' ')
+    let g = ''
+    for (let val = lo; val <= hi; val += 20) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(val)}" y2="${y(val)}" stroke="#E6EBE8"/><text class="ax" x="${m.l - 8}" y="${y(val) + 4}" text-anchor="end">${val}</text>`
+    ;[140, 90].forEach((val) => (g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(val)}" y2="${y(val)}" stroke="#9AA8A2" stroke-dasharray="4 3"/>`))
+    const ticks = narrow ? [pts[0], pts[pts.length - 1]] : pts
+    ticks.forEach((p, i) => (g += `<text class="ax" x="${x(p.t)}" y="${H - 6}" text-anchor="${narrow ? (i ? 'end' : 'start') : 'middle'}">${p.today ? 'Today' : fmt(p.t, { month: 'short', year: 'numeric' })}</text>`))
+    const series = [['sys', '#16906F', 'Systolic'], ['dia', '#8A63D2', 'Diastolic']]
+    series.forEach(([k, c]) => {
+      g += `<path d="${line(k)}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`
+      pts.forEach((p) => (g += `<circle cx="${x(p.t)}" cy="${y(p[k])}" r="4.5" fill="${c}" stroke="#fff" stroke-width="2"/>`))
+    })
+    const z = pts[pts.length - 1]
+    if (!narrow) series.forEach(([k, , l]) => (g += `<text class="dl" x="${x(z.t) + 12}" y="${y(z[k]) + 4}">${l} ${z[k]}</text>`))
+    // hover / focus targets: one column per visit, wider than the marks
+    pts.forEach((p, i) => {
+      const a = i ? (x(pts[i - 1].t) + x(p.t)) / 2 : m.l - 10, b = i < pts.length - 1 ? (x(p.t) + x(pts[i + 1].t)) / 2 : W - m.r + 10
+      g += `<rect class="hit" data-i="${i}" x="${a}" y="0" width="${b - a}" height="${H}" tabindex="0" aria-label="${p.today ? 'Today' : fmt(p.t)}: ${p.sys}/${p.dia}"/>`
+    })
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="height:${H}px"><line id="xhair" y1="${m.t}" y2="${H - m.b}" stroke="#B9C4BF" visibility="hidden"/>${g}</svg><div class="tip" id="bpTip"></div>`
+    const tip = $('#bpTip', el), xh = $('#xhair', el)
+    const show = (i) => { const p = pts[i]; xh.setAttribute('x1', x(p.t)); xh.setAttribute('x2', x(p.t)); xh.setAttribute('visibility', 'visible')
+      tip.innerHTML = `<b>${p.today ? 'Today' : fmt(p.t)}</b>Blood pressure ${p.sys}/${p.dia}${p.hr ? `<br>Pulse ${p.hr}` : ''}`
+      tip.style.left = Math.min(Math.max(x(p.t) + 20, 90), W - 50) + 'px'; tip.style.top = y(p.sys) + 16 + 'px'; tip.classList.add('on') }
+    const hide = () => { tip.classList.remove('on'); xh.setAttribute('visibility', 'hidden') }
+    $$('.hit', el).forEach((r) => { r.addEventListener('pointerenter', () => show(+r.dataset.i)); r.addEventListener('focus', () => show(+r.dataset.i)); r.addEventListener('blur', hide) })
+    el.querySelector('svg').addEventListener('pointerleave', hide)
+  }
+  let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (!$('#v-file').hidden) renderFile() }, 150) })
+
+  function render() { renderCounts(); renderQueue(); renderDetail(); renderPatients(); renderSummary(); if (!$('#v-file').hidden) renderFile() }
+  render()
+})()
+</script>
+</body>
+</html>
